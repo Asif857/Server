@@ -54,10 +54,30 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             connections.send(this.connectId,"1003");
             return;
         }
-        else if (opcode.equals("04")){
+        else if (opcode.equals("04")){//follow = 0, unfollow = 1
+            char follow = message.charAt(index);
+            index++;
+            String Username = message.substring(index);
+            User currUser = handler.getUser();
+            User followUser = currUser.findFollowingUser(Username);
+            if (currUser==null || (follow == '0' && followUser!=null) || (follow == '1' && followUser==null) || follow!='0' || follow !='1')
+            {
+                connections.send(this.connectId,"1004");
+                return;
+            }
+            if (follow == '0'){
+                currUser.getFollowList().add(followUser);
+            }
+            else if (follow == '1'){
+                currUser.getFollowList().remove(followUser);
+            }
+            connections.send(this.connectId,"1104" + followUser + "\0");
+            return;
 
         }
         else if (opcode.equals("05")){
+        String content = cutString(index,message);
+
 
         }
         else if (opcode.equals("06")){

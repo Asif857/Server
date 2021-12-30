@@ -1,3 +1,4 @@
+import java.io.*;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -42,7 +43,11 @@ public class ConnectionsImpl<T> implements Connections<T>{
     }
 
     public boolean send(int connectionId, T msg) {
+        if (!handlerMap.containsKey(connectionId))
         return false;
+        ConnectionHandlerImpl handler = (ConnectionHandlerImpl) handlerMap.get(connectionId);
+        handler.send(msg);
+        return true;
     }
 
     @Override

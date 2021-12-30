@@ -21,8 +21,6 @@ public class ConnectionHandlerImpl<T> implements ConnectionHandler<T>,Runnable{
     public void close() throws IOException {
 
     }
-
-    @Override
     public void run() {
         try (Socket sock = this.sock) { //just for automatic closing
             int read;
@@ -55,5 +53,13 @@ public class ConnectionHandlerImpl<T> implements ConnectionHandler<T>,Runnable{
     }
     public User getUser(){
         return user;
+    }
+
+    public BufferedInputStream getIn() {
+        return in;
+    }
+
+    public BufferedOutputStream getOut() {
+        return out;
     }
 }
