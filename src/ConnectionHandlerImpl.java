@@ -64,4 +64,8 @@ public class ConnectionHandlerImpl<T> implements ConnectionHandler<T>,Runnable{
     public User getUser(){
         return user;
     }
+
+    public Socket getSock() {
+        return sock;
+    }
 }

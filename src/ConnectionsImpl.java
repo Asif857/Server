@@ -1,3 +1,7 @@
+import java.io.*;
+import java.net.Socket;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -45,7 +49,8 @@ public class ConnectionsImpl<T> implements Connections<T>{
         if(!handlerMap.containsKey(connectionId)){
             return false;
         }
-        //Understand what this is meant to do and why the message is a generic type.
+        ConnectionHandlerImpl handler = (ConnectionHandlerImpl) handlerMap.get(connectionId);
+        handler.send(msg);
         return true;
     }
 
