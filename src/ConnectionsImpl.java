@@ -42,12 +42,16 @@ public class ConnectionsImpl<T> implements Connections<T>{
     }
 
     public boolean send(int connectionId, T msg) {
-        return false;
+        if(!handlerMap.containsKey(connectionId)){
+            return false;
+        }
+        //Understand what this is meant to do and why the message is a generic type.
+        return true;
     }
 
     @Override
     public void broadcast(T msg) {
-
+        //Find out why we need this
     }
 
     @Override

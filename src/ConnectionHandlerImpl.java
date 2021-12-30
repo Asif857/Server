@@ -44,7 +44,15 @@ public class ConnectionHandlerImpl<T> implements ConnectionHandler<T>,Runnable{
     }
     @Override
     public void send(T msg) {
-
+        if(msg != null) {
+            try {
+                BufferedOutputStream out = new BufferedOutputStream(sock.getOutputStream());
+                out.write(encdec.encode(msg));
+                out.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public BidiMessagingProtocol<T> getProtocol() {

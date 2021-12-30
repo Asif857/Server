@@ -1,3 +1,5 @@
+import java.util.LinkedList;
+
 public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
     private Connections connections = null;
     private int connectId=-1;
@@ -8,6 +10,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
     public void process(String message) {
         ConnectionsImpl connectionImpl = (ConnectionsImpl) connections;
         ConnectionHandlerImpl handler = (ConnectionHandlerImpl) connectionImpl.getHandler(connectId);
+        User currUser = handler.getUser();
         int index =2;
         String opcode = message.substring(0,2);
         if (opcode.equals("01")){
@@ -55,10 +58,35 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             return;
         }
         else if (opcode.equals("04")){
-
+            char follow = message.charAt(index);
+            index++;
+            String username = message.substring(index);
+            User followUser = currUser.findFollowUser(username);
+            if(currUser == null || (follow == '0' && followUser != null)||(follow == '1' && followUser == null) || follow != '0' ||follow != '1'){
+                connections.send(this.connectId, "1104");
+                return;
+            }
+            if(follow == '0'){
+                currUser.getFollowList().add(followUser);
+            }
+            else {
+                currUser.getFollowList().remove(followUser);
+            }
+            connections.send(connectId, "1104" + followUser.getUserName() + "\0");
         }
         else if (opcode.equals("05")){
-
+            String content = cutString(index, message);
+            if(currUser == null){
+                connections.send(this.connectId, "1105");
+                return;
+            }
+            LinkedList<String> usernameList = new LinkedList<>();
+            for (int i=0; i<content.length()-1;i++){
+                if(i == '@'){
+                    String username = cutString(i+1, content, ' ');
+                    usernameList.add(username);
+                }
+            }
         }
         else if (opcode.equals("06")){
 
@@ -92,6 +120,14 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
         String result = "";
         while (index<string.length() && string.charAt(index)!='/' && string.charAt(index+1)!= '0') {
             result = result + string.charAt(index);
+            index++;
+        }
+        return result;
+    }
+    private String cutString(int index,String string, char stop){
+        String result = "";
+        while (index<string.length() && string.charAt(index)!= stop){
+            result += string.charAt(index);
             index++;
         }
         return result;
