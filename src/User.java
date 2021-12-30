@@ -1,3 +1,4 @@
+import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -9,12 +10,15 @@ public class User {
     private LinkedList<User> followList;
     private LinkedList<String> postedMessages;
     private LinkedList<String> pmMessages;
-
+    private LinkedList<String> receivedMessages;
 
     public User(String userName, String password, String birthday) {
         this.userName = userName;
         this.password = password;
         this.birthday = birthday;
+        this.followList = new LinkedList<>();
+        this.postedMessages = new LinkedList<>();
+        this.receivedMessages = new LinkedList<>();
         this.followList = new LinkedList<>();
     }
 
