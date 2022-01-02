@@ -15,8 +15,9 @@ public class User {
     private ConnectionHandler connectionHandler;
     private LinkedList<User> followList;
     private LinkedList<String> postedMessages;
+    private LinkedList<User> blockedList;
     private LinkedBlockingQueue<String> receivedMessages;
-    private int follows = 0;
+    private int followed = 0;
 
     public User(String userName, String password, String birthday) {
         this.userName = userName;
@@ -26,6 +27,7 @@ public class User {
         this.postedMessages = new LinkedList<>();
         this.receivedMessages = new LinkedBlockingQueue<>();
         this.followList = new LinkedList<>();
+        this.blockedList = new LinkedList<>();
     }
 
     public LinkedList<User> getFollowList() {
@@ -70,19 +72,23 @@ public class User {
     }
 
     public int getFollows() {
-        return follows;
+        return followed;
     }
 
-    public void increaseFollows(){
-        this.follows += 1;
+    public void increaseFollowed(){
+        this.followed += 1;
     }
 
-    public void decreaseFollows(){
-        this.follows -= 1;
+    public void decreaseFollowed(){
+        this.followed -= 1;
     }
     public int getAge(){
         LocalDate date = LocalDate.now();
         LocalDate birthday = LocalDate.parse(this.birthday);
         return Period.between(birthday,date).getYears();
+    }
+
+    public LinkedList<User> getBlockedList() {
+        return blockedList;
     }
 }

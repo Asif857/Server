@@ -1,4 +1,5 @@
 import java.text.ParseException;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
@@ -65,18 +66,18 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             String Username = message.substring(index);
             User followUser = currUser.findFollowingUser(Username);
             User user = connectionImpl.findUser(Username);
-            if (currUser==null || user==null || (follow == '0' && followUser!=null) || (follow == '1' && followUser==null) || follow!='0' || follow !='1')
+            if (currUser==null || user==null || (follow == '0' && followUser!=null) || (follow == '1' && followUser==null) || follow!='0' || follow !='1'||user.getBlockedList().contains(currUser)||!(currUser.getBlockedList().contains(user)))
             {
                 connections.send(this.connectId,"1004");
                 return;
             }
             if (follow == '0'){
                 currUser.getFollowList().add(user);
-                followUser.increaseFollows();
+                followUser.increaseFollowed();
             }
             else if (follow == '1'){
                 currUser.getFollowList().remove(user);
-                followUser.decreaseFollows();
+                followUser.decreaseFollowed();
             }
             connections.send(this.connectId,"1104" + followUser + "\0");
             return;
@@ -103,13 +104,13 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             connectionImpl.getMessageList().add(filteredContent);
             for (String userName : usernameList) { // Like connections.send
                 User user = connectionImpl.findUser(userName); //might return null, if the user doesn't exist.
-                if (user != null) {
-                    if (user.getConnectionHandler() == null)
-                        user.getReceivedMessages().add(filteredContent);
-                    else{
-                        int connectId = connectionImpl.getConnectionID(user.getConnectionHandler());//if no handlers, return -1;
-                        connections.send(connectId,filteredContent);
-                    }
+                if (user != null || !(user.getBlockedList().contains(currUser))||!(currUser.getBlockedList().contains(user))) {
+                        if (user.getConnectionHandler() == null)
+                            user.getReceivedMessages().add(filteredContent);
+                        else {
+                            int connectId = connectionImpl.getConnectionID(user.getConnectionHandler());//if no handlers, return -1;
+                            connections.send(connectId, filteredContent);
+                        }
 
                 }
             }
@@ -127,7 +128,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             index = index + content.length()+2;
             String dateTime = cutString(index,message);
             User receivedUser = connectionImpl.findUser(userName); // will return null if doesn't exist.
-            if (currUser==null||receivedUser==null||!currUser.getFollowList().contains(receivedUser)){
+            if (currUser==null||receivedUser==null||!currUser.getFollowList().contains(receivedUser)||receivedUser.getBlockedList().contains(currUser)||!(currUser.getBlockedList().contains(receivedUser))){
                 connectionImpl.send(connectId,"1106");
                 return;
             }
@@ -138,8 +139,19 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             return;
         }
         else if (opcode.equals("07")){
-
-
+        if (currUser==null){
+            connections.send(connectId,"1107");
+            return;
+        }
+        Iterator ita = connectionImpl.getUserList().iterator();
+        String ack = "1007";
+        while(ita.hasNext()){
+            User user = (User) ita.next();
+            if (!user.equals(currUser))
+            ack += user.getAge() + " " + user.getPostedMessages().size() + " " + user.getFollowList().size() + " " + user.getFollows() + "\0";
+        }
+        connectionImpl.send(connectId,ack);
+        return;
         }
         else if (opcode.equals("08")){
         if (currUser==null){
@@ -178,7 +190,18 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
 //
 //        }
         else if (opcode.equals("12")){
-
+            String userName = cutString(index,message);
+            User blockedUser = connectionImpl.findUser(userName);//will be null if it doesn't exist.
+            if (currUser == null || blockedUser==null|| currUser.getBlockedList().contains(blockedUser)){
+                connectionImpl.send(connectId,"1112");
+                return;
+            }
+            connectionImpl.send(connectId,"1012");
+            currUser.getBlockedList().add(blockedUser);
+            if(currUser.getFollowList().remove(blockedUser))
+                currUser.decreaseFollowed();
+            if(blockedUser.getFollowList().remove(currUser))
+                currUser.decreaseFollowed();
         }
 
 
