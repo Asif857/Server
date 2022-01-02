@@ -1,7 +1,13 @@
 import java.nio.ByteBuffer;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 public class User {
     private String userName;
@@ -12,6 +18,7 @@ public class User {
     private LinkedList<String> postedMessages;
     private LinkedList<String> pmMessages;
     private LinkedBlockingQueue<String> receivedMessages;
+    private int followed;
 
     public User(String userName, String password, String birthday) {
         this.userName = userName;
@@ -61,5 +68,18 @@ public class User {
 
     public LinkedBlockingQueue<String> getReceivedMessages() {
         return receivedMessages;
+    }
+
+    public int getFollowed() {
+        return followed;
+    }
+    public long getAge() throws ParseException {
+        SimpleDateFormat dtf = new SimpleDateFormat("dd/MM/YYYY");
+        Date now =new Date();
+        Date birthday = dtf.parse(this.birthday);
+        long diff = now.getTime() - birthday.getTime();
+        TimeUnit time = TimeUnit.DAYS;
+        long age = (time.convert(diff,TimeUnit.MILLISECONDS));
+        return age/365;
     }
 }

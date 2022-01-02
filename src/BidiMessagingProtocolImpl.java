@@ -1,3 +1,4 @@
+import java.text.ParseException;
 import java.util.LinkedList;
 
 public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
@@ -7,7 +8,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
         this.connectId = connectId;
         this.connections=connections;
     }
-    public void process(String message) {
+    public void process(String message) throws ParseException {
         ConnectionsImpl connectionImpl = (ConnectionsImpl) connections;
         ConnectionHandlerImpl handler = (ConnectionHandlerImpl) connectionImpl.getHandler(connectId);
         User currUser = handler.getUser();
@@ -135,8 +136,31 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
         }
         else if (opcode.equals("07")){
 
+
         }
         else if (opcode.equals("08")){
+        if (currUser==null){
+            connections.send(connectId,"1108");
+        }
+        String content = cutString(index,message);
+        LinkedList<User> users = new LinkedList<>();
+        while (index<content.length()){// if it managed to finish this, it means all the users are valid.
+            String userName = this.cutString(index,content,'|');
+            if (!userName.equals("")) {
+                User user = connectionImpl.findUser(userName); // returns null if there is no such user.
+                if (user == null){
+                    connections.send(connectId,"1108");
+                    return;
+                }
+                users.add(user);
+            }
+            String ack = "1008";
+            for (User user : users){
+                ack += user.getAge() + user.get
+            }
+        }
+
+
 
         }
 //        else if (opcode.equals("09")){
