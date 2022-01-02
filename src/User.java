@@ -9,7 +9,7 @@ public class User {
     private ConnectionHandler connectionHandler;
     private LinkedList<User> followList;
     private LinkedList<String> postedMessages;
-    private LinkedList<ByteBuffer> receivedMessages;
+    private LinkedList<String> receivedMessages;
 
     public User(String userName, String password, String birthday) {
         this.userName = userName;
@@ -58,11 +58,11 @@ public class User {
         return postedMessages;
     }
 
-    public LinkedList<ByteBuffer> getReceivedMessages() {
+    public LinkedList<String> getReceivedMessages() {
         return receivedMessages;
     }
 
-    public void receiveMessage(ByteBuffer message){
+    public void receiveMessage(String message){
         this.receivedMessages.add(message);
     }
 }
