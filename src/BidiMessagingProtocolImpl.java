@@ -42,10 +42,9 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             user.setConnectionHandler(handler);
             handler.setUser(user);
             connections.send(this.connectId,"1002");
-            // Need to add stuff, so when the user logs in and already has messages, it will get them.
-            // Need to add stuff, so when the user logs in and already has messages, it will get them.
-            // Need to add stuff, so when the user logs in and already has messages, it will get them.
-            // Need to add stuff, so when the user logs in and already has messages, it will get them.
+            while (!user.getReceivedMessages().isEmpty()){
+                this.process(user.getReceivedMessages().poll());
+            }
             return;
         }
         else if (opcode.equals("03")){
@@ -53,6 +52,8 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
                 connections.send(this.connectId, "1103");
                 return;
             }
+            User user = handler.getUser();
+            user.setConnectionHandler(null);
             handler.setUser(null);
             connections.send(this.connectId,"1003");
             return;
@@ -75,14 +76,15 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             }
             connections.send(this.connectId,"1104" + followUser + "\0");
             return;
-
         }
+
         else if (opcode.equals("05")){
-            String content = cutString(index, message);
             if(currUser == null){
                 connections.send(this.connectId, "1105");
                 return;
             }
+            String content = cutString(index, message);
+            connectionImpl.getMessageList().add(content);
             LinkedList<String> usernameList = new LinkedList<>();
             for (int i=0; i<content.length()-1;i++){
                 if(i == '@'){
@@ -90,7 +92,22 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
                     usernameList.add(username);
                 }
             }
+            for (User user : currUser.getFollowList()) {
+                if (!usernameList.contains(user.getUserName()))
+                    usernameList.add(user.getUserName());
+            }
+            for (String userName : usernameList){ // Like connections.send
+                User user = connectionImpl.findUser(userName);
+                if (user.getConnectionHandler()==null)
+                    user.getReceivedMessages().add(content);
+                else
+                    user.getConnectionHandler().send(content);
+            }
+
         }
+
+
+
         else if (opcode.equals("06")){
 
         }
@@ -100,15 +117,15 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
         else if (opcode.equals("08")){
 
         }
-        else if (opcode.equals("09")){
-
-        }
-        else if (opcode.equals("10")){
-
-        }
-        else if (opcode.equals("11")){
-
-        }
+//        else if (opcode.equals("09")){
+//
+//        }
+//        else if (opcode.equals("10")){
+//
+//        }
+//        else if (opcode.equals("11")){
+//
+//        }
         else if (opcode.equals("12")){
 
         }

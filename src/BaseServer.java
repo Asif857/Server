@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.LinkedList;
 import java.util.function.Supplier;
 public abstract class BaseServer<T> implements Server<T> {
     private final ConnectionsImpl<T> connections;
@@ -13,8 +14,10 @@ public abstract class BaseServer<T> implements Server<T> {
     public BaseServer(
             int port,
             Supplier<BidiMessagingProtocol<T>> protocolFactory,
-            Supplier<MessageEncoderDecoder<T>> encdecFactory) {
-        this.connections = new ConnectionsImpl<>();
+            Supplier<MessageEncoderDecoder<T>> encdecFactory,
+            LinkedList<String> filterList)
+    {
+        this.connections = new ConnectionsImpl<>(filterList);
         this.port = port;
         this.protocolFactory = protocolFactory;
         this.encdecFactory = encdecFactory;

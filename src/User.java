@@ -1,6 +1,7 @@
 import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class User {
     private String userName;
@@ -10,7 +11,7 @@ public class User {
     private LinkedList<User> followList;
     private LinkedList<String> postedMessages;
     private LinkedList<String> pmMessages;
-    private LinkedList<String> receivedMessages;
+    private LinkedBlockingQueue<String> receivedMessages;
 
     public User(String userName, String password, String birthday) {
         this.userName = userName;
@@ -18,7 +19,7 @@ public class User {
         this.birthday = birthday;
         this.followList = new LinkedList<>();
         this.postedMessages = new LinkedList<>();
-        this.receivedMessages = new LinkedList<>();
+        this.receivedMessages = new LinkedBlockingQueue<>();
         this.followList = new LinkedList<>();
     }
 
@@ -54,8 +55,11 @@ public class User {
         }
         return null;
     }
-
     public LinkedList<String> getPostedMessages() {
         return postedMessages;
+    }
+
+    public LinkedBlockingQueue<String> getReceivedMessages() {
+        return receivedMessages;
     }
 }
