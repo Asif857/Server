@@ -40,11 +40,21 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             index = index + password.length() + 1;
             char captcha = message.charAt(index);
             User user = connectionImpl.findUser(userName);
-            if (user==null || !user.getPassword().equals(password) || captcha == '0' || user.getConnectionHandler()!=null || handler.getUser()!=null){
-                connections.send(this.connectId,"1102");
+            if (user!=null) {
+                synchronized (user) {
+                    if (!user.getPassword().equals(password) || captcha == '0' || user.getConnectionHandler() != null || handler.getUser() != null) {
+                        connections.send(this.connectId, "1102");
+                        return;
+                    }
+                    user.setConnectionHandler(handler);
+                    user.notifyAll();
+                }
+            }
+            else
+            {
+                connections.send(this.connectId, "1102");
                 return;
             }
-            user.setConnectionHandler(handler);
             handler.setUser(user);
             connections.send(this.connectId,"1002");
             while(!user.getReceivedMessages().isEmpty()){
