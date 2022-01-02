@@ -85,7 +85,8 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
                 return;
             }
             String content = cutString(index, message);
-            connectionImpl.getMessageList().add(content);
+            String filteredContent = connectionImpl.filteredMsg(content);
+            connectionImpl.getMessageList().add(filteredContent);
             LinkedList<String> usernameList = new LinkedList<>();
             for (int i=0; i<content.length()-1;i++){
                 if(i == '@'){
@@ -100,15 +101,29 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             }
             for(String username: usernameList){
                 User user = connectionImpl.findUser(username);
-                if(user.getConnectionHandler() == null){
-                    user.getReceivedMessages().add(content);
+                if(user != null) {
+                    if (user.getConnectionHandler() == null) {
+                        user.getReceivedMessages().add(filteredContent);
+                    } else {
+                        ConnectionHandlerImpl cHandler = (ConnectionHandlerImpl) user.getConnectionHandler();
+                        int connectId = connectionImpl.getConnectionID(cHandler);
+                            connectionImpl.send(connectId, filteredContent);
+                        }
+                    }
                 }
-                else{
-                    user.getConnectionHandler().send(content);
-                }
-            }
+            return;
         }
         else if (opcode.equals("06")){
+            String username = cutString(index, message);
+            index += username.length() +2;
+            String content = cutString(index, message);
+            index += content.length() +2;
+            String dateTime = cutString(index, message);
+            User recievedUser = connectionImpl.findUser(username);
+            if(currUser == null || recievedUser == null || !currUser.getFollowList().contains(recievedUser)){
+                connectionImpl.send(connectId, "1106");
+                return;
+            }
 
         }
         else if (opcode.equals("07")){

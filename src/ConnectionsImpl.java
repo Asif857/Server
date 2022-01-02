@@ -4,12 +4,13 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class ConnectionsImpl<T> implements Connections<T>{
-    private ConcurrentHashMap<Integer,ConnectionHandler<T>> handlerMap;
+public class ConnectionsImpl<T> implements Connections<String>{
+    private ConcurrentHashMap<Integer,ConnectionHandler<String>> handlerMap;
     private LinkedBlockingDeque<User> userList;
     private LinkedBlockingQueue<String> messageList = new LinkedBlockingQueue<>();
     private LinkedList<String> filteredLists;
@@ -42,7 +43,7 @@ public class ConnectionsImpl<T> implements Connections<T>{
     }
 
 
-    public ConcurrentHashMap<Integer, ConnectionHandler<T>> getHandlerMap() {
+    public ConcurrentHashMap<Integer, ConnectionHandler<String>> getHandlerMap() {
         return handlerMap;
     }
 
@@ -50,7 +51,7 @@ public class ConnectionsImpl<T> implements Connections<T>{
         return userList;
     }
 
-    public boolean send(int connectionId, T msg) {
+    public boolean send(int connectionId, String msg) {
         if(!handlerMap.containsKey(connectionId)){
             return false;
         }
@@ -60,7 +61,7 @@ public class ConnectionsImpl<T> implements Connections<T>{
     }
 
     @Override
-    public void broadcast(T msg) {
+    public void broadcast(String msg) {
         //Find out why we need this
     }
 
@@ -76,4 +77,21 @@ public class ConnectionsImpl<T> implements Connections<T>{
     public LinkedList<String> getFilteredLists() {
         return filteredLists;
     }
+
+    public int getConnectionID(ConnectionHandlerImpl handler){
+        for(Map.Entry<Integer, ConnectionHandler<String>> entry: handlerMap.entrySet()){
+            if(handler == entry.getValue()) {
+                return entry.getKey();
+            }
+        }
+        return -1;
+    }
+
+    public String filteredMsg(String msg){
+        for(String word : filteredLists){
+            msg.replace(word, "<filtered>");
+        }
+        return msg;
+    }
+
 }
