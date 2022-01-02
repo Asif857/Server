@@ -1,8 +1,7 @@
-import java.nio.ByteBuffer;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -16,9 +15,8 @@ public class User {
     private ConnectionHandler connectionHandler;
     private LinkedList<User> followList;
     private LinkedList<String> postedMessages;
-    private LinkedList<String> pmMessages;
     private LinkedBlockingQueue<String> receivedMessages;
-    private int followed;
+    private int follows = 0;
 
     public User(String userName, String password, String birthday) {
         this.userName = userName;
@@ -62,6 +60,7 @@ public class User {
         }
         return null;
     }
+
     public LinkedList<String> getPostedMessages() {
         return postedMessages;
     }
@@ -70,16 +69,20 @@ public class User {
         return receivedMessages;
     }
 
-    public int getFollowed() {
-        return followed;
+    public int getFollows() {
+        return follows;
     }
-    public long getAge() throws ParseException {
-        SimpleDateFormat dtf = new SimpleDateFormat("dd/MM/YYYY");
-        Date now =new Date();
-        Date birthday = dtf.parse(this.birthday);
-        long diff = now.getTime() - birthday.getTime();
-        TimeUnit time = TimeUnit.DAYS;
-        long age = (time.convert(diff,TimeUnit.MILLISECONDS));
-        return age/365;
+
+    public void increaseFollows(){
+        this.follows += 1;
+    }
+
+    public void decreaseFollows(){
+        this.follows -= 1;
+    }
+    public int getAge(){
+        LocalDate date = LocalDate.now();
+        LocalDate birthday = LocalDate.parse(this.birthday);
+        return Period.between(birthday,date).getYears();
     }
 }

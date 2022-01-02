@@ -3,6 +3,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.LinkedList;
 import java.util.function.Supplier;
+//works!
 public abstract class BaseServer<T> implements Server<T> {
     private final ConnectionsImpl<T> connections;
     private final int port;
@@ -15,8 +16,7 @@ public abstract class BaseServer<T> implements Server<T> {
             int port,
             Supplier<BidiMessagingProtocol<T>> protocolFactory,
             Supplier<MessageEncoderDecoder<T>> encdecFactory,
-            LinkedList<String> filterList)
-    {
+            LinkedList<String> filterList) {
         this.connections = new ConnectionsImpl<>(filterList);
         this.port = port;
         this.protocolFactory = protocolFactory;
@@ -39,7 +39,7 @@ public abstract class BaseServer<T> implements Server<T> {
                         encdecFactory.get(),
                         protocolFactory.get());
                 connections.addHandlerMap(connectId,handler);
-                handler.getProtocol().start(connectId,connections);
+                handler.getProtocol().start(connectId, (Connections<T>) connections);
                 connectId++;
                 execute(handler);
             }

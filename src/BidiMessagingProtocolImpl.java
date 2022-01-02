@@ -64,16 +64,19 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             index++;
             String Username = message.substring(index);
             User followUser = currUser.findFollowingUser(Username);
-            if (currUser==null || (follow == '0' && followUser!=null) || (follow == '1' && followUser==null) || follow!='0' || follow !='1')
+            User user = connectionImpl.findUser(Username);
+            if (currUser==null || user==null || (follow == '0' && followUser!=null) || (follow == '1' && followUser==null) || follow!='0' || follow !='1')
             {
                 connections.send(this.connectId,"1004");
                 return;
             }
             if (follow == '0'){
-                currUser.getFollowList().add(followUser);
+                currUser.getFollowList().add(user);
+                followUser.increaseFollows();
             }
             else if (follow == '1'){
-                currUser.getFollowList().remove(followUser);
+                currUser.getFollowList().remove(user);
+                followUser.decreaseFollows();
             }
             connections.send(this.connectId,"1104" + followUser + "\0");
             return;
@@ -146,6 +149,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
         LinkedList<User> users = new LinkedList<>();
         while (index<content.length()){// if it managed to finish this, it means all the users are valid.
             String userName = this.cutString(index,content,'|');
+            index += userName.length()+1;
             if (!userName.equals("")) {
                 User user = connectionImpl.findUser(userName); // returns null if there is no such user.
                 if (user == null){
@@ -154,12 +158,13 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
                 }
                 users.add(user);
             }
+        }
             String ack = "1008";
             for (User user : users){
-                ack += user.getAge() + user.get
+                ack += user.getAge() + " " + user.getPostedMessages().size() + " " + user.getFollowList().size() + " " + user.getFollows() + "\0";
             }
-        }
-
+            connections.send(connectId,"ack");
+            return;
 
 
         }
