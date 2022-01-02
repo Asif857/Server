@@ -1,6 +1,5 @@
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
@@ -19,44 +18,47 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
         pushByte(nextByte);
         return null; //not a line yet
     }
-    public byte[] encode(String message) {
-        int index = 0;
-        String first = message.substring(0,2);
-        index += 2;
-        String second = message.substring(2,4);
-        index += 2;
-        short opcodeClient = Short.valueOf(first);
-        short opcodeServer = Short.valueOf(second);
-        String zero = "\0";
-        byte[] a = shortToBytes(opcodeClient);
-        byte[] b = shortToBytes(opcodeServer);
+    public byte[] encode(String message){
+    int index = 0;
+    String first = message.substring(index,2);
+    index += 2;
+    String second = message.substring(index,4);
+    index +=2;
+    short opcodeClient = Short.valueOf(first);
+    short opcodeServer = Short.valueOf(second);
+    String zero = "\0";
+    byte[] a = shortToBytes(opcodeClient);
+    byte[] b = shortToBytes(opcodeServer);
         try(ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             outputStream.write(a);
             outputStream.write(b);
-
-            if(opcodeServer == 4){
-                String username = cutString(index, message);
-                outputStream.write(username.getBytes());
+            //we have the first 2 shorts as bytes.
+            if (opcodeServer==4){
+                String userName = cutString(index,message);
+                outputStream.write(userName.getBytes()); //uses UTF-8 by default.
                 outputStream.write(zero.getBytes());
             }
-            else if(opcodeServer == 7){
-                String age = cutString(index, message, ' ');
-                index += age.length() + 1;
-                byte[] w = stringToByte(age);
-                String numPosts = cutString(index, message, ' ');
-                index += numPosts.length()+1;
-                byte[] y = stringToByte(numPosts);
-                String numFollowers = cutString(index, message, ' ');
-                index += numFollowers.length() + 1;
-                byte[] z = stringToByte()
+            else if (opcodeServer==7) {
+                while (index < message.length()) {
+                    byte[] ans;
+                    for (int i = 0; i < 3; i++) {
+                        String len = cutString(index, message, ' ');
+                        index += len.length()+1;
+                        ans = shortToBytes(Short.valueOf(len));
+                        outputStream.write(ans);
+                    }
+                    ans = shortToBytes(Short.valueOf(cutString(index,message)));
+                    index+=2; //last iteration has \0 in it.
+                    outputStream.write(ans);
+                }
             }
-
-            byte byteArray[] = outputStream.toByteArray();
+            byte byteArray[]=outputStream.toByteArray();
             return byteArray;
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
+
+        return null; //won't happen
     }
 
     private void pushByte(byte nextByte) {
@@ -108,8 +110,5 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
         return result;
     }
 
-    private byte[] stringToByte(String string){
-        short a = Short.valueOf(string);
-        return shortToBytes(a);
-    }
+
 }

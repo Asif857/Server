@@ -20,20 +20,18 @@ public class ConnectionHandlerImpl<T> implements ConnectionHandler<T>,Runnable{
 
 
     public void close() throws IOException {
-        connected = false;
-        sock.close();
-        in.close();
-        out.close();
+    connected=false;
+    sock.close();
+    in.close();
+    out.close();
     }
 
-    @Override
     public void run() {
         try (Socket sock = this.sock) { //just for automatic closing
             int read;
 
             in = new BufferedInputStream(sock.getInputStream());
             out = new BufferedOutputStream(sock.getOutputStream());
-
             while (!protocol.shouldTerminate() && connected && (read = in.read()) >= 0) {
                 T nextMessage = encdec.decodeNextByte((byte) read);
                 if (nextMessage != null) {
