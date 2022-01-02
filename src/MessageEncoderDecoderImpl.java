@@ -14,7 +14,7 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
             return popString();
         }
         pushByte(nextByte);
-        return null; //not a line yet
+        return null;
     }
     public byte[] encode(String message){
     int index = 0;
