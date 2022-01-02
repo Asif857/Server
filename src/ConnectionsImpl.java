@@ -55,7 +55,7 @@ public class ConnectionsImpl<T> implements Connections<String>{
     }
 
     public LinkedBlockingDeque<User> getUserList() {
-        return userList;
+        return this.userList;
     }
 
     public boolean send(int connectionId, String msg) {
@@ -76,14 +76,16 @@ public class ConnectionsImpl<T> implements Connections<String>{
     public void broadcast(String msg) {
         //Find out why we need this
     }
+
+    @Override
     public void disconnect(int connectionId) {
         ConnectionHandler handler = this.getHandler(connectionId);
         try {
             handler.close();
+            this.getHandlerMap().remove(connectionId);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        this.getHandlerMap().remove(connectionId);
     }
 
     public LinkedBlockingQueue<String> getMessageList() {

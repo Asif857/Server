@@ -1,12 +1,12 @@
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.nio.ByteBuffer;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.Period;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 public class User {
     private String userName;
@@ -15,8 +15,8 @@ public class User {
     private ConnectionHandler connectionHandler;
     private LinkedList<User> followList;
     private LinkedList<String> postedMessages;
-    private LinkedList<User> blockedList;
     private LinkedBlockingQueue<String> receivedMessages;
+    private LinkedList<User> blockedList;
     private int followed = 0;
 
     public User(String userName, String password, String birthday) {
@@ -26,12 +26,7 @@ public class User {
         this.followList = new LinkedList<>();
         this.postedMessages = new LinkedList<>();
         this.receivedMessages = new LinkedBlockingQueue<>();
-        this.followList = new LinkedList<>();
         this.blockedList = new LinkedList<>();
-    }
-
-    public LinkedList<User> getFollowList() {
-        return followList;
     }
 
     public String getUserName() {
@@ -53,7 +48,12 @@ public class User {
     public void setConnectionHandler(ConnectionHandler connectionHandler) {
         this.connectionHandler = connectionHandler;
     }
-    public User findFollowingUser(String userName){
+
+    public LinkedList<User> getFollowList() {
+        return followList;
+    }
+
+    public User findFollowUser(String username){
         Iterator ita = followList.iterator();
         while (ita.hasNext()){
             User user = (User) ita.next();
@@ -71,7 +71,11 @@ public class User {
         return receivedMessages;
     }
 
-    public int getFollows() {
+    public void receiveMessage(String message){
+        this.receivedMessages.add(message);
+    }
+
+    public int getFollowed() {
         return followed;
     }
 
@@ -82,10 +86,11 @@ public class User {
     public void decreaseFollowed(){
         this.followed -= 1;
     }
+
     public int getAge(){
         LocalDate date = LocalDate.now();
         LocalDate birthday = LocalDate.parse(this.birthday);
-        return Period.between(birthday,date).getYears();
+        return Period.between(birthday, date).getYears();
     }
 
     public LinkedList<User> getBlockedList() {
