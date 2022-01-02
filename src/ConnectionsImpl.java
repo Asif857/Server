@@ -3,16 +3,21 @@ import java.net.Socket;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class ConnectionsImpl<T> implements Connections<T>{
     private ConcurrentHashMap<Integer,ConnectionHandler<T>> handlerMap;
     private LinkedBlockingDeque<User> userList;
+    private LinkedBlockingQueue<String> messageList = new LinkedBlockingQueue<>();
+    private LinkedList<String> filteredLists;
 
-    public ConnectionsImpl() {
+    public ConnectionsImpl(LinkedList<String> filteredWords) {
         this.handlerMap = new ConcurrentHashMap<>();
         this.userList = new LinkedBlockingDeque<>();
+        this.filteredLists = filteredWords;
     }
 
     public void addHandlerMap(int connectId,ConnectionHandler connect){
@@ -62,5 +67,13 @@ public class ConnectionsImpl<T> implements Connections<T>{
     @Override
     public void disconnect(int connectionId) {
 
+    }
+
+    public LinkedBlockingQueue<String> getMessageList() {
+        return messageList;
+    }
+
+    public LinkedList<String> getFilteredLists() {
+        return filteredLists;
     }
 }

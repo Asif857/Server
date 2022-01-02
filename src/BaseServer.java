@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.LinkedList;
 import java.util.function.Supplier;
 //works!
 public abstract class BaseServer<T> implements Server<T> {
@@ -11,11 +12,8 @@ public abstract class BaseServer<T> implements Server<T> {
     private ServerSocket sock;
     private int connectId=0;
 
-    public BaseServer(
-            int port,
-            Supplier<BidiMessagingProtocol<T>> protocolFactory,
-            Supplier<MessageEncoderDecoder<T>> encdecFactory) {
-        this.connections = new ConnectionsImpl<>();
+    public BaseServer(int port, Supplier<BidiMessagingProtocol<T>> protocolFactory, Supplier<MessageEncoderDecoder<T>> encdecFactory, LinkedList<String> filteredWords) {
+        this.connections = new ConnectionsImpl<>(filteredWords);
         this.port = port;
         this.protocolFactory = protocolFactory;
         this.encdecFactory = encdecFactory;

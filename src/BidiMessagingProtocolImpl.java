@@ -28,6 +28,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             connections.send(this.connectId,"1001");
             return;
         }
+
         else if (opcode.equals("02")){
             String userName = cutString(index,message);
             index = index + userName.length() + 2;
@@ -42,21 +43,24 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             user.setConnectionHandler(handler);
             handler.setUser(user);
             connections.send(this.connectId,"1002");
-            // Need to add stuff, so when the user logs in and already has messages, it will get them.
-            // Need to add stuff, so when the user logs in and already has messages, it will get them.
-            // Need to add stuff, so when the user logs in and already has messages, it will get them.
-            // Need to add stuff, so when the user logs in and already has messages, it will get them.
+            while(!user.getReceivedMessages().isEmpty()){
+                this.process(user.getReceivedMessages().poll());
+            }
             return;
         }
+
         else if (opcode.equals("03")){
             if (handler.getUser()==null) {
                 connections.send(this.connectId, "1103");
                 return;
             }
+            User user = handler.getUser();
+            user.setConnectionHandler(null);
             handler.setUser(null);
             connections.send(this.connectId,"1003");
             return;
         }
+
         else if (opcode.equals("04")){
             char follow = message.charAt(index);
             index++;
@@ -74,17 +78,33 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             }
             connections.send(connectId, "1104" + followUser.getUserName() + "\0");
         }
+
         else if (opcode.equals("05")){
-            String content = cutString(index, message);
             if(currUser == null){
                 connections.send(this.connectId, "1105");
                 return;
             }
+            String content = cutString(index, message);
+            connectionImpl.getMessageList().add(content);
             LinkedList<String> usernameList = new LinkedList<>();
             for (int i=0; i<content.length()-1;i++){
                 if(i == '@'){
                     String username = cutString(i+1, content, ' ');
                     usernameList.add(username);
+                }
+            }
+            for(User user: currUser.getFollowList()){
+                if(!usernameList.contains(user.getUserName())){
+                    usernameList.add(user.getUserName());
+                }
+            }
+            for(String username: usernameList){
+                User user = connectionImpl.findUser(username);
+                if(user.getConnectionHandler() == null){
+                    user.getReceivedMessages().add(content);
+                }
+                else{
+                    user.getConnectionHandler().send(content);
                 }
             }
         }
