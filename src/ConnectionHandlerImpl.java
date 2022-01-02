@@ -42,7 +42,6 @@ public class ConnectionHandlerImpl<T> implements ConnectionHandler<T>,Runnable{
         }
 
     }
-    @Override
     public void send(T msg) {
         if(msg != null) {
             try {

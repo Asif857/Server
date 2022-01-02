@@ -4,11 +4,12 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class ConnectionsImpl<T> implements Connections<T>{
+public class ConnectionsImpl<T> implements Connections<String>{
     private ConcurrentHashMap<Integer,ConnectionHandler<T>> handlerMap;
     private LinkedBlockingDeque<User> userList;
     private LinkedBlockingQueue<String> messageList;
@@ -41,8 +42,14 @@ public class ConnectionsImpl<T> implements Connections<T>{
     public ConnectionHandler getHandler(int connectId){
         return handlerMap.get(connectId);
     }
-
-
+    public int getConnectionID(ConnectionHandler handler) {
+        for (Map.Entry<Integer, ConnectionHandler<T>> entry : handlerMap.entrySet()) {
+            if (handler == entry.getValue()) {
+                return entry.getKey();
+            }
+        }
+        return -1;
+    }
     public ConcurrentHashMap<Integer, ConnectionHandler<T>> getHandlerMap() {
         return handlerMap;
     }
@@ -51,16 +58,22 @@ public class ConnectionsImpl<T> implements Connections<T>{
         return userList;
     }
 
-    public boolean send(int connectionId, T msg) {
+    public boolean send(int connectionId, String msg) {
         if (!handlerMap.containsKey(connectionId))
         return false;
         ConnectionHandlerImpl handler = (ConnectionHandlerImpl) handlerMap.get(connectionId);
         handler.send(msg);
         return true;
     }
+    public String filterMsg(String msg) {
+        for (String filter : filterList){
+                msg.replace(filter,"<filtered>");
+        }
+        return msg;
+    }
 
     @Override
-    public void broadcast(T msg) {
+    public void broadcast(String msg) {
         //Find out why we need this
     }
 

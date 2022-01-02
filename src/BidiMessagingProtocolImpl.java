@@ -84,7 +84,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
                 return;
             }
             String content = cutString(index, message);
-            connectionImpl.getMessageList().add(content);
+            String filteredContent = connectionImpl.filterMsg(content);
             LinkedList<String> usernameList = new LinkedList<>();
             for (int i=0; i<content.length()-1;i++){
                 if(i == '@'){
@@ -96,19 +96,38 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
                 if (!usernameList.contains(user.getUserName()))
                     usernameList.add(user.getUserName());
             }
-            for (String userName : usernameList){ // Like connections.send
-                User user = connectionImpl.findUser(userName);
-                if (user.getConnectionHandler()==null)
-                    user.getReceivedMessages().add(content);
-                else
-                    user.getConnectionHandler().send(content);
+            connectionImpl.getMessageList().add(filteredContent);
+            for (String userName : usernameList) { // Like connections.send
+                User user = connectionImpl.findUser(userName); //might return null, if the user doesn't exist.
+                if (user != null) {
+                    if (user.getConnectionHandler() == null)
+                        user.getReceivedMessages().add(filteredContent);
+                    else{
+                        int connectId = connectionImpl.getConnectionID(user.getConnectionHandler());//if no handlers, return -1;
+                        connections.send(connectId,filteredContent);
+                    }
+
+                }
             }
+            return;
 
         }
 
 
 
         else if (opcode.equals("06")){
+            String userName = cutString(index,message);
+            index=index + userName.length()+2;
+            String content = cutString(index,message);
+            index = index + userName.length()+2;
+            String dateTime = cutString(index,message);
+            User receivedUser = connectionImpl.findUser(userName); // will return null if doesn't exist.
+            if (currUser==null||receivedUser==null||!currUser.getFollowList().contains(receivedUser)){
+                connectionImpl.send(connectId,"1106");
+                return;
+            }
+
+
 
         }
         else if (opcode.equals("07")){
