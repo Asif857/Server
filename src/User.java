@@ -1,6 +1,12 @@
 import java.nio.ByteBuffer;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.Period;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class User {
     private String userName;
@@ -9,7 +15,7 @@ public class User {
     private ConnectionHandler connectionHandler;
     private LinkedList<User> followList;
     private LinkedList<String> postedMessages;
-    private LinkedList<String> receivedMessages;
+    private LinkedBlockingQueue<String> receivedMessages;
     private int followed = 0;
 
     public User(String userName, String password, String birthday) {
@@ -18,7 +24,7 @@ public class User {
         this.birthday = birthday;
         this.followList = new LinkedList<>();
         this.postedMessages = new LinkedList<>();
-        this.receivedMessages = new LinkedList<>();
+        this.receivedMessages = new LinkedBlockingQueue<>();
     }
 
     public String getUserName() {
@@ -59,7 +65,7 @@ public class User {
         return postedMessages;
     }
 
-    public LinkedList<String> getReceivedMessages() {
+    public LinkedBlockingQueue<String> getReceivedMessages() {
         return receivedMessages;
     }
 
@@ -77,5 +83,11 @@ public class User {
 
     public void decreaseFollowed(){
         this.followed -= 1;
+    }
+
+    public int getAge(){
+        LocalDate date = LocalDate.now();
+        LocalDate birthday = LocalDate.parse(this.birthday);
+        return Period.between(birthday, date).getYears();
     }
 }

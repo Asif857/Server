@@ -66,17 +66,18 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             index++;
             String username = message.substring(index);
             User followUser = currUser.findFollowUser(username);
-            if(currUser == null || (follow == '0' && followUser != null)||(follow == '1' && followUser == null) || follow != '0' ||follow != '1'){
+            User requestedUser = connectionImpl.findUser(username);
+            if(currUser == null || (follow == '0' && followUser != null)||(follow == '1' && followUser == null) || follow != '0' ||follow != '1'||requestedUser == null){
                 connections.send(this.connectId, "1104");
                 return;
             }
             if(follow == '0'){
-                currUser.getFollowList().add(followUser);
-                followUser.increaseFollowed();
+                currUser.getFollowList().add(requestedUser);
+                requestedUser.increaseFollowed();
             }
             else {
-                currUser.getFollowList().remove(followUser);
-                followUser.decreaseFollowed();
+                currUser.getFollowList().remove(requestedUser);
+                requestedUser.decreaseFollowed();
             }
             connections.send(connectId, "1104" + followUser.getUserName() + "\0");
         }
@@ -139,10 +140,10 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             //Need to understand logstat
         }
         else if (opcode.equals("08")){
-            String content = cutString(index, message);
             if(currUser == null){
                 connectionImpl.send(connectId, "1108");
             }
+            String content = cutString(index, message);
             LinkedList<User> users = new LinkedList();
             index = 0;
             while(index < content.length()){
@@ -161,18 +162,24 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             }
             String ack = "1008";
             for(User statUser : users){
-
+                String age = Integer.toString(statUser.getAge());
+                String numPosts = Integer.toString(statUser.getPostedMessages().size());
+                String followers = Integer.toString(statUser.getFollowed());
+                String following = Integer.toString(statUser.getFollowList().size());
+                ack += age + " " + numPosts + " " + followers + " " + following + "\0";
             }
+            connectionImpl.send(connectId, ack);
+            return;
         }
-        else if (opcode.equals("09")){
-
-        }
-        else if (opcode.equals("10")){
-
-        }
-        else if (opcode.equals("11")){
-
-        }
+//        else if (opcode.equals("09")){
+//
+//        }
+//        else if (opcode.equals("10")){
+//
+//        }
+//        else if (opcode.equals("11")){
+//
+//        }
         else if (opcode.equals("12")){
 
         }
