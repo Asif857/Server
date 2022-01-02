@@ -35,7 +35,7 @@ public abstract class BaseServer<T> implements Server<T> {
                         encdecFactory.get(),
                         protocolFactory.get());
                 connections.addHandlerMap(connectId,handler);
-                handler.getProtocol().start(connectId,connections);
+                handler.getProtocol().start(connectId, (Connections<T>) connections);
                 connectId++;
                 execute(handler);
             }
