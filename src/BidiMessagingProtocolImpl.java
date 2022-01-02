@@ -47,6 +47,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
                         return;
                     }
                     user.setConnectionHandler(handler);
+                    user.notifyAll();
                 }
             }
             else
