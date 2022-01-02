@@ -48,7 +48,7 @@ public class ConnectionsImpl<T> implements Connections<String>{
     }
 
     public LinkedBlockingDeque<User> getUserList() {
-        return userList;
+        return this.userList;
     }
 
     public boolean send(int connectionId, String msg) {

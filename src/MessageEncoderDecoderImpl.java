@@ -17,7 +17,7 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
         return null; //not a line yet
     }
     public byte[] encode(String message) {
-        return (message + ";").getBytes(); //uses utf8 by default
+        /////
     }
 
     private void pushByte(byte nextByte) {
@@ -29,8 +29,6 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
     }
 
     private String popString() {
-        //notice that we explicitly requesting that the string will be decoded from UTF-8
-        //this is not actually required as it is the default encoding in java.
         short ops = bytesToShort(bytes);
         String result = new String(bytes, 0, len, StandardCharsets.UTF_8);
         len = 0;

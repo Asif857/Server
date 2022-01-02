@@ -16,6 +16,7 @@ public class User {
     private LinkedList<User> followList;
     private LinkedList<String> postedMessages;
     private LinkedBlockingQueue<String> receivedMessages;
+    private LinkedList<User> blockedList;
     private int followed = 0;
 
     public User(String userName, String password, String birthday) {
@@ -25,6 +26,7 @@ public class User {
         this.followList = new LinkedList<>();
         this.postedMessages = new LinkedList<>();
         this.receivedMessages = new LinkedBlockingQueue<>();
+        this.blockedList = new LinkedList<>();
     }
 
     public String getUserName() {
@@ -89,5 +91,9 @@ public class User {
         LocalDate date = LocalDate.now();
         LocalDate birthday = LocalDate.parse(this.birthday);
         return Period.between(birthday, date).getYears();
+    }
+
+    public LinkedList<User> getBlockedList() {
+        return blockedList;
     }
 }
