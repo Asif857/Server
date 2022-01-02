@@ -10,15 +10,16 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class ConnectionsImpl<T> implements Connections<String>{
-    private ConcurrentHashMap<Integer,ConnectionHandler<String>> handlerMap;
+    private ConcurrentHashMap<Integer,ConnectionHandler<T>> handlerMap;
     private LinkedBlockingDeque<User> userList;
-    private LinkedBlockingQueue<String> messageList = new LinkedBlockingQueue<>();
-    private LinkedList<String> filteredLists;
+    private LinkedBlockingQueue<String> messageList;
+    private LinkedList<String> filterList;
 
-    public ConnectionsImpl(LinkedList<String> filteredWords) {
+    public ConnectionsImpl(LinkedList filterList) {
         this.handlerMap = new ConcurrentHashMap<>();
         this.userList = new LinkedBlockingDeque<>();
-        this.filteredLists = filteredWords;
+        this.messageList = new LinkedBlockingQueue<>();
+        this.filterList = filterList;
     }
 
     public void addHandlerMap(int connectId,ConnectionHandler connect){
@@ -41,9 +42,15 @@ public class ConnectionsImpl<T> implements Connections<String>{
     public ConnectionHandler getHandler(int connectId){
         return handlerMap.get(connectId);
     }
-
-
-    public ConcurrentHashMap<Integer, ConnectionHandler<String>> getHandlerMap() {
+    public int getConnectionID(ConnectionHandler handler) {
+        for (Map.Entry<Integer, ConnectionHandler<T>> entry : handlerMap.entrySet()) {
+            if (handler == entry.getValue()) {
+                return entry.getKey();
+            }
+        }
+        return -1;
+    }
+    public ConcurrentHashMap<Integer, ConnectionHandler<T>> getHandlerMap() {
         return handlerMap;
     }
 
@@ -52,12 +59,17 @@ public class ConnectionsImpl<T> implements Connections<String>{
     }
 
     public boolean send(int connectionId, String msg) {
-        if(!handlerMap.containsKey(connectionId)){
-            return false;
-        }
+        if (!handlerMap.containsKey(connectionId))
+        return false;
         ConnectionHandlerImpl handler = (ConnectionHandlerImpl) handlerMap.get(connectionId);
         handler.send(msg);
         return true;
+    }
+    public String filterMsg(String msg) {
+        for (String filter : filterList){
+                msg.replace(filter,"<filtered>");
+        }
+        return msg;
     }
 
     @Override
@@ -73,25 +85,4 @@ public class ConnectionsImpl<T> implements Connections<String>{
     public LinkedBlockingQueue<String> getMessageList() {
         return messageList;
     }
-
-    public LinkedList<String> getFilteredLists() {
-        return filteredLists;
-    }
-
-    public int getConnectionID(ConnectionHandlerImpl handler){
-        for(Map.Entry<Integer, ConnectionHandler<String>> entry: handlerMap.entrySet()){
-            if(handler == entry.getValue()) {
-                return entry.getKey();
-            }
-        }
-        return -1;
-    }
-
-    public String filteredMsg(String msg){
-        for(String word : filteredLists){
-            msg.replace(word, "<filtered>");
-        }
-        return msg;
-    }
-
 }

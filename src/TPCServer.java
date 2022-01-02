@@ -6,8 +6,9 @@ public class TPCServer{
             int port,
             Supplier<BidiMessagingProtocol<T>> protocolFactory,
             Supplier<MessageEncoderDecoder<T>> encoderDecoderFactory,
-            LinkedList<String> filteredWords) {
-        return new BaseServer<T>(port, protocolFactory, encoderDecoderFactory, filteredWords) {
+            LinkedList<String> filterList)
+            {
+        return new BaseServer<T>(port, protocolFactory, encoderDecoderFactory,filterList) {
             protected void execute(ConnectionHandlerImpl<T> handler) {
                 new Thread(handler).start();
             }

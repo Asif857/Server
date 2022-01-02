@@ -12,8 +12,12 @@ public abstract class BaseServer<T> implements Server<T> {
     private ServerSocket sock;
     private int connectId=0;
 
-    public BaseServer(int port, Supplier<BidiMessagingProtocol<T>> protocolFactory, Supplier<MessageEncoderDecoder<T>> encdecFactory, LinkedList<String> filteredWords) {
-        this.connections = new ConnectionsImpl<>(filteredWords);
+    public BaseServer(
+            int port,
+            Supplier<BidiMessagingProtocol<T>> protocolFactory,
+            Supplier<MessageEncoderDecoder<T>> encdecFactory,
+            LinkedList<String> filterList) {
+        this.connections = new ConnectionsImpl<>(filterList);
         this.port = port;
         this.protocolFactory = protocolFactory;
         this.encdecFactory = encdecFactory;

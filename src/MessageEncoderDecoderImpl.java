@@ -1,3 +1,4 @@
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
@@ -17,7 +18,8 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
         return null; //not a line yet
     }
     public byte[] encode(String message) {
-        /////
+
+
     }
 
     private void pushByte(byte nextByte) {
@@ -29,6 +31,8 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
     }
 
     private String popString() {
+        //notice that we explicitly requesting that the string will be decoded from UTF-8
+        //this is not actually required as it is the default encoding in java.
         short ops = bytesToShort(bytes);
         String result = new String(bytes, 0, len, StandardCharsets.UTF_8);
         len = 0;
@@ -41,5 +45,12 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
         short result = (short)((byteArr[0] & 0xff) << 8);
         result += (short)(byteArr[1] & 0xff);
         return result;
+    }
+    public byte[] shortToBytes(short num)
+    {
+        byte[] bytesArr = new byte[2];
+        bytesArr[0] = (byte)((num >> 8) & 0xFF);
+        bytesArr[1] = (byte)(num & 0xFF);
+        return bytesArr;
     }
 }

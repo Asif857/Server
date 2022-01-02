@@ -2,6 +2,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.text.ParseException;
 
 public class ConnectionHandlerImpl<T> implements ConnectionHandler<T>,Runnable{
     private final BidiMessagingProtocol<T> protocol;
@@ -37,12 +38,11 @@ public class ConnectionHandlerImpl<T> implements ConnectionHandler<T>,Runnable{
                 }
             }
 
-        } catch (IOException ex) {
+        } catch (IOException | ParseException ex) {
             ex.printStackTrace();
         }
 
     }
-    @Override
     public void send(T msg) {
         if(msg != null) {
             try {
@@ -63,6 +63,14 @@ public class ConnectionHandlerImpl<T> implements ConnectionHandler<T>,Runnable{
     }
     public User getUser(){
         return user;
+    }
+
+    public BufferedInputStream getIn() {
+        return in;
+    }
+
+    public BufferedOutputStream getOut() {
+        return out;
     }
 
     public Socket getSock() {
