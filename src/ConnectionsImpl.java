@@ -79,7 +79,13 @@ public class ConnectionsImpl<T> implements Connections<String>{
 
     @Override
     public void disconnect(int connectionId) {
-
+        ConnectionHandler handler = this.getHandler(connectionId);
+        try {
+            handler.close();
+            this.getHandlerMap().remove(connectionId);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public LinkedBlockingQueue<String> getMessageList() {

@@ -6,6 +6,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
     private Connections connections = null;
     private int connectId=-1;
+    private boolean terminate = false;
     public void start(int connectId, Connections connections) {
         this.connectId = connectId;
         this.connections=connections;
@@ -61,6 +62,8 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             user.setConnectionHandler(null);
             handler.setUser(null);
             connections.send(this.connectId,"1003");
+            this.terminate = true;
+            connectionImpl.disconnect(connectId);
             return;
         }
 
@@ -91,7 +94,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
                 return;
             }
             String content = cutString(index, message);
-            String filteredContent = connectionImpl.filteredMsg(content);
+            String filteredContent = connectionImpl.filterMsg(content);
             connectionImpl.getMessageList().add(filteredContent);
             LinkedList<String> usernameList = new LinkedList<>();
             for (int i=0; i<content.length()-1;i++){
@@ -131,7 +134,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
                 connectionImpl.send(connectId, "1106");
                 return;
             }
-            String filteredContent = connectionImpl.filteredMsg(content);
+            String filteredContent = connectionImpl.filterMsg(content);
             connectionImpl.getMessageList().add(filteredContent);
             ConnectionHandlerImpl recievedHandler = (ConnectionHandlerImpl) recievedUser.getConnectionHandler();
             int receivedID  = connectionImpl.getConnectionID(recievedHandler);
@@ -223,7 +226,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
 
     }
     public boolean shouldTerminate() {
-        return false;
+        return terminate;
     }
     private String cutString(int index,String string){
         String result = "";

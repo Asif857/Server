@@ -20,7 +20,10 @@ public class ConnectionHandlerImpl<T> implements ConnectionHandler<T>,Runnable{
 
 
     public void close() throws IOException {
-
+        connected = false;
+        sock.close();
+        in.close();
+        out.close();
     }
 
     @Override
