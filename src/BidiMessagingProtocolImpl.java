@@ -109,6 +109,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
 
                 }
             }
+            connections.send(this.connectId,"1005");
             return;
 
         }
@@ -119,16 +120,18 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             String userName = cutString(index,message);
             index=index + userName.length()+2;
             String content = cutString(index,message);
-            index = index + userName.length()+2;
+            index = index + content.length()+2;
             String dateTime = cutString(index,message);
             User receivedUser = connectionImpl.findUser(userName); // will return null if doesn't exist.
             if (currUser==null||receivedUser==null||!currUser.getFollowList().contains(receivedUser)){
                 connectionImpl.send(connectId,"1106");
                 return;
             }
-
-
-
+            String filteredContent = connectionImpl.filterMsg(content);
+            connectionImpl.getMessageList().add(filteredContent);
+            connections.send(connectionImpl.getConnectionID(receivedUser.getConnectionHandler()),filteredContent);
+            connections.send(connectId,"1006");
+            return;
         }
         else if (opcode.equals("07")){
 
