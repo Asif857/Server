@@ -72,9 +72,11 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             }
             if(follow == '0'){
                 currUser.getFollowList().add(followUser);
+                followUser.increaseFollowed();
             }
             else {
                 currUser.getFollowList().remove(followUser);
+                followUser.decreaseFollowed();
             }
             connections.send(connectId, "1104" + followUser.getUserName() + "\0");
         }
@@ -134,10 +136,33 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             return;
         }
         else if (opcode.equals("07")){
-
+            //Need to understand logstat
         }
         else if (opcode.equals("08")){
+            String content = cutString(index, message);
+            if(currUser == null){
+                connectionImpl.send(connectId, "1108");
+            }
+            LinkedList<User> users = new LinkedList();
+            index = 0;
+            while(index < content.length()){
+                String name = cutString(index, content, '|');
+                if(!name.equals("")) {
+                    User user = connectionImpl.findUser(name);
+                    if(user != null){
+                        users.add(user);
+                        index += name.length() + 1;
+                    }
+                    else{
+                        connectionImpl.send(connectId, "1108");
+                        return;
+                    }
+                }
+            }
+            String ack = "1008";
+            for(User statUser : users){
 
+            }
         }
         else if (opcode.equals("09")){
 

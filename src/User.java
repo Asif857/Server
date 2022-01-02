@@ -10,6 +10,7 @@ public class User {
     private LinkedList<User> followList;
     private LinkedList<String> postedMessages;
     private LinkedList<String> receivedMessages;
+    private int followed = 0;
 
     public User(String userName, String password, String birthday) {
         this.userName = userName;
@@ -64,5 +65,17 @@ public class User {
 
     public void receiveMessage(String message){
         this.receivedMessages.add(message);
+    }
+
+    public int getFollowed() {
+        return followed;
+    }
+
+    public void increaseFollowed(){
+        this.followed += 1;
+    }
+
+    public void decreaseFollowed(){
+        this.followed -= 1;
     }
 }
