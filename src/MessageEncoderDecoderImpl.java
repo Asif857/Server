@@ -46,7 +46,7 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
                         outputStream.write(ans);
                     }
                     ans = shortToBytes(Short.valueOf(cutString(index,message)));
-                    index+=2; //last iteration has \0 in it.
+                    index+=1; //last iteration has \0 in it.
                     outputStream.write(ans);
                 }
             }
@@ -60,7 +60,7 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
                         outputStream.write(ans);
                     }
                     ans = shortToBytes(Short.valueOf(cutString(index,message)));
-                    index+=2; //last iteration has \0 in it.
+                    index+=1; //last iteration has \0 in it.
                     outputStream.write(ans);
                 }
             }
