@@ -52,6 +52,20 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
                     outputStream.write(ans);
                 }
             }
+            else if(opcodeServer ==8){
+                while (index < message.length()) {
+                    byte[] ans;
+                    for (int i = 0; i < 3; i++) {
+                        String len = cutString(index, message, ' ');
+                        index += len.length()+1;
+                        ans = shortToBytes(Short.valueOf(len));
+                        outputStream.write(ans);
+                    }
+                    ans = shortToBytes(Short.valueOf(cutString(index,message)));
+                    index+=2; //last iteration has \0 in it.
+                    outputStream.write(ans);
+                }
+            }
             byte byteArray[]=outputStream.toByteArray();
             return byteArray;
         } catch (IOException e) {
