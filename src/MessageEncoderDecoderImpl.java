@@ -1,4 +1,5 @@
-import java.nio.ByteBuffer;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
@@ -17,9 +18,47 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
         pushByte(nextByte);
         return null; //not a line yet
     }
-    public byte[] encode(String message) {
+    public byte[] encode(String message){
+    int index = 0;
+    String first = message.substring(index,2);
+    index += 2;
+    String second = message.substring(index,4);
+    index +=2;
+    short opcodeClient = Short.valueOf(first);
+    short opcodeServer = Short.valueOf(second);
+    String zero = "\0";
+    byte[] a = shortToBytes(opcodeClient);
+    byte[] b = shortToBytes(opcodeServer);
+        try(ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            outputStream.write(a);
+            outputStream.write(b);
+            //we have the first 2 shorts as bytes.
+            if (opcodeServer==4){
+                String userName = cutString(index,message);
+                outputStream.write(userName.getBytes()); //uses UTF-8 by default.
+                outputStream.write(zero.getBytes());
+            }
+            else if (opcodeServer==7) {
+                while (index < message.length()) {
+                    byte[] ans;
+                    for (int i = 0; i < 3; i++) {
+                        String len = cutString(index, message, ' ');
+                        index += len.length()+1;
+                        ans = shortToBytes(Short.valueOf(len));
+                        outputStream.write(ans);
+                    }
+                    ans = shortToBytes(Short.valueOf(cutString(index,message)));
+                    index+=2; //last iteration has \0 in it.
+                    outputStream.write(ans);
+                }
+            }
+            byte byteArray[]=outputStream.toByteArray();
+            return byteArray;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-
+        return null; //won't happen
     }
 
     private void pushByte(byte nextByte) {
@@ -53,4 +92,23 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
         bytesArr[1] = (byte)(num & 0xFF);
         return bytesArr;
     }
+
+    private String cutString(int index,String string){
+        String result = "";
+        while (index<string.length() && string.charAt(index)!='/' && string.charAt(index+1)!= '0') {
+            result = result + string.charAt(index);
+            index++;
+        }
+        return result;
+    }
+    private String cutString(int index,String string, char stop){
+        String result = "";
+        while (index<string.length() && string.charAt(index)!= stop){
+            result += string.charAt(index);
+            index++;
+        }
+        return result;
+    }
+
+
 }

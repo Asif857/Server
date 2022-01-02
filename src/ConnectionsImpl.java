@@ -76,10 +76,14 @@ public class ConnectionsImpl<T> implements Connections<String>{
     public void broadcast(String msg) {
         //Find out why we need this
     }
-
-    @Override
     public void disconnect(int connectionId) {
-
+        ConnectionHandler handler = this.getHandler(connectionId);
+        try {
+            handler.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        this.getHandlerMap().remove(connectionId);
     }
 
     public LinkedBlockingQueue<String> getMessageList() {

@@ -5,6 +5,7 @@ import java.util.LinkedList;
 public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
     private Connections connections = null;
     private int connectId=-1;
+    private Boolean terminate = false;
     public void start(int connectId, Connections connections) {
         this.connectId = connectId;
         this.connections=connections;
@@ -58,6 +59,8 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             user.setConnectionHandler(null);
             handler.setUser(null);
             connections.send(this.connectId,"1003");
+            this.terminate=true;
+            connectionImpl.disconnect(connectId);
             return;
         }
         else if (opcode.equals("04")){//follow = 0, unfollow = 1
@@ -208,8 +211,9 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
 
     }
     public boolean shouldTerminate() {
-        return false;
+        return terminate;
     }
+
     private String cutString(int index,String string){
         String result = "";
         while (index<string.length() && string.charAt(index)!='/' && string.charAt(index+1)!= '0') {
