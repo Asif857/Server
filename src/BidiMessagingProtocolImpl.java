@@ -121,11 +121,11 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
                 User user = connectionImpl.findUser(username);
                 if(user != null || !user.getBlockedList().contains(currUser) || !currUser.getBlockedList().contains(user)) {
                     if (user.getConnectionHandler() == null) {
-                        user.getReceivedMessages().add("0905"+filteredContent);
+                        user.getReceivedMessages().add("090"+ currUser.getUserName() + "\0" + filteredContent);
                     } else {
                         ConnectionHandlerImpl cHandler = (ConnectionHandlerImpl) user.getConnectionHandler();
                         int connectId = connectionImpl.getConnectionID(cHandler);
-                            connectionImpl.send(connectId, "0905"+filteredContent);
+                            connectionImpl.send(connectId, "090"+ currUser.getUserName() + "\0" + filteredContent);
                         }
                     }
                 }
@@ -144,10 +144,10 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
                 return;
             }
             String filteredContent = connectionImpl.filterMsg(content);
-            connectionImpl.getMessageList().add(filteredContent);
+            connectionImpl.getMessageList().add("091"+ currUser.getUserName() + "\0" + filteredContent);
             ConnectionHandlerImpl recievedHandler = (ConnectionHandlerImpl) recievedUser.getConnectionHandler();
             int receivedID  = connectionImpl.getConnectionID(recievedHandler);
-            connectionImpl.send(receivedID, filteredContent);
+            connectionImpl.send(receivedID, "091"+ currUser.getUserName() + "\0" + filteredContent);
             connectionImpl.send(connectId, "1006");
             return;
         }
