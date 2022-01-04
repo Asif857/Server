@@ -65,7 +65,7 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
                 }
             }
             outputStream.write(";".getBytes());
-            byte byteArray[]=outputStream.toByteArray();
+            byte[] byteArray=outputStream.toByteArray();
             return byteArray;
         } catch (IOException e) {
             e.printStackTrace();
@@ -85,11 +85,16 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
     private String popString() {
         //notice that we explicitly requesting that the string will be decoded from UTF-8
         //this is not actually required as it is the default encoding in java.
+        byte[] opcode = new byte[2];
+        opcode[0] = bytes[0];
+        opcode[1] = bytes[1];
         short ops = bytesToShort(bytes);
-        String result = new String(bytes, 0, len, StandardCharsets.UTF_8);
+        String result = Short.toString(ops);
+        result += new String(bytes, 2, len, StandardCharsets.UTF_8);
         len = 0;
-        if (ops<10)
+        if (ops<10) {
             result = "0" + result;
+        }
         return result;
     }
     public short bytesToShort(byte[] byteArr)
