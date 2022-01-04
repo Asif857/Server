@@ -12,12 +12,14 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
         this.connections=connections;
     }
     public void process(String message) {
+        System.out.println(message);
         ConnectionsImpl connectionImpl = (ConnectionsImpl) connections;
         ConnectionHandlerImpl handler = (ConnectionHandlerImpl) connectionImpl.getHandler(connectId);
         User currUser = handler.getUser();
         int index =2;
         String opcode = message.substring(0,2);
         if (opcode.equals("01")){
+            System.out.println("user has registered!");
             String userName = cutString(index,message);
             index = index + userName.length() + 1;
             if (connectionImpl.findUser(userName)==null){
@@ -35,6 +37,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
 
         else if (opcode.equals("02")){
             String userName = cutString(index,message);
+            System.out.println(userName + " has logged in!");
             index = index + userName.length() + 1;
             String password = cutString(index,message);
             index = index + password.length() + 1;
@@ -71,6 +74,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             User user = handler.getUser();
             user.setConnectionHandler(null);
             handler.setUser(null);
+            System.out.println("User has logged out!");
             connections.send(this.connectId,"1003");
             this.terminate = true;
             connectionImpl.disconnect(connectId);
