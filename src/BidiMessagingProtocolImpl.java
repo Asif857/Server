@@ -19,13 +19,13 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
         String opcode = message.substring(0,2);
         if (opcode.equals("01")){
             String userName = cutString(index,message);
-            index = index + userName.length() + 2;
+            index = index + userName.length() + 1;
             if (connectionImpl.findUser(userName)==null){
                 connections.send(this.connectId,"1101");
                 return;
             }
             String password = cutString(index,message);
-            index = index + password.length() + 2;
+            index = index + password.length() + 1;
             String birthday = cutString(index,message);
             User user = new User(userName,password,birthday);
             connectionImpl.addUser(user);
@@ -35,9 +35,9 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
 
         else if (opcode.equals("02")){
             String userName = cutString(index,message);
-            index = index + userName.length() + 2;
+            index = index + userName.length() + 1;
             String password = cutString(index,message);
-            index = index + password.length() + 2;
+            index = index + password.length() + 1;
             char captcha = message.charAt(index);
             User user = connectionImpl.findUser(userName);
             if (user!=null) {
@@ -134,9 +134,9 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
         }
         else if (opcode.equals("06")){
             String username = cutString(index, message);
-            index += username.length() +2;
+            index += username.length() +1;
             String content = cutString(index, message);
-            index += content.length() +2;
+            index += content.length() +1;
             String dateTime = cutString(index, message);
             User recievedUser = connectionImpl.findUser(username);
             if(currUser == null || recievedUser == null || !currUser.getFollowList().contains(recievedUser) || currUser.getBlockedList().contains(recievedUser) ||recievedUser.getBlockedList().contains(currUser)){
@@ -239,7 +239,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
     }
     private String cutString(int index,String string){
         String result = "";
-        while (index<string.length() && string.charAt(index)!='/' && string.charAt(index+1)!= '0') {
+        while (index<string.length() && string.charAt(index)!='\0'){
             result = result + string.charAt(index);
             index++;
         }
