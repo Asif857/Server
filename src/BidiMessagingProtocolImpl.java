@@ -16,13 +16,18 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
         ConnectionsImpl connectionImpl = (ConnectionsImpl) connections;
         ConnectionHandlerImpl handler = (ConnectionHandlerImpl) connectionImpl.getHandler(connectId);
         User currUser = handler.getUser();
+        if(currUser != null) {
+            System.out.println("New user username is - " + currUser.getUserName());
+        }
         int index =2;
         String opcode = message.substring(0,2);
         if (opcode.equals("01")){
             System.out.println("user has registered!");
             String userName = cutString(index,message);
+            System.out.println("Username - " + userName);
             index = index + userName.length() + 1;
-            if (connectionImpl.findUser(userName)==null){
+            if (connectionImpl.findUser(userName)!= null){
+                System.out.println("Entered error!");
                 connections.send(this.connectId,"1101");
                 return;
             }
@@ -209,15 +214,6 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             connectionImpl.send(connectId, ack);
             return;
         }
-//        else if (opcode.equals("09")){
-//
-//        }
-//        else if (opcode.equals("10")){
-//
-//        }
-//        else if (opcode.equals("11")){
-//
-//        }
         else if (opcode.equals("12")){
             String username = cutString(index, message);
             User blockedUser = connectionImpl.findUser(username);

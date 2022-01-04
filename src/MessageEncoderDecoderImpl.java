@@ -89,24 +89,13 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
         opcode[0] = bytes[0];
         opcode[1] = bytes[1];
         short ops = bytesToShort(bytes);
-        System.out.println("ops- " + ops);
         String result = Short.toString(ops);
-        System.out.println("result- " + result);
-//        int arrlen=0;
-//        for (byte b : bytes) {
-//            if (b == 0) {
-//                System.out.println("arrlen is- " + arrlen);
-//                break;
-//            }
-//            arrlen++;
-//        }
         result += new String(bytes, 2, len-2, StandardCharsets.UTF_8);
-        System.out.println("len is - " + len);
         len = 0;
         if (ops<10) {
             result = "0" + result;
         }
-        System.out.println("new result- " + result);
+        System.out.println("result- " + result);
         return result;
     }
     public short bytesToShort(byte[] byteArr)
