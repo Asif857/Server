@@ -122,7 +122,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
                 User user = connectionImpl.findUser(username);
                 if(user != null || !user.getBlockedList().contains(currUser) || !currUser.getBlockedList().contains(user)) {
                     if (user.getConnectionHandler() == null) {
-                        user.getReceivedMessages().add("090"+ currUser.getUserName() + "\0" + filteredContent + "\0");
+                        user.getReceivedMessages().add("091" + currUser.getUserName() + "\0" + filteredContent + "\0");
                     } else {
                         ConnectionHandlerImpl cHandler = (ConnectionHandlerImpl) user.getConnectionHandler();
                         int connectId = connectionImpl.getConnectionID(cHandler);
