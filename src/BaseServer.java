@@ -33,7 +33,6 @@ public abstract class BaseServer<T> implements Server<T> {
 
             while (!Thread.currentThread().isInterrupted()) {
                 Socket clientSock = serverSock.accept();
-                System.out.println("Someone has connected!");
                 ConnectionHandlerImpl<T> handler = new ConnectionHandlerImpl(
                         clientSock,
                         encdecFactory.get(),
