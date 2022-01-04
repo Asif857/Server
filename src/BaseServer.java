@@ -32,15 +32,12 @@ public abstract class BaseServer<T> implements Server<T> {
             this.sock = serverSock; //just to be able to close
 
             while (!Thread.currentThread().isInterrupted()) {
-
                 Socket clientSock = serverSock.accept();
-                System.out.println("a user has connected!");
                 ConnectionHandlerImpl<T> handler = new ConnectionHandlerImpl(
                         clientSock,
                         encdecFactory.get(),
                         protocolFactory.get());
                 connections.addHandlerMap(connectId,handler);
-                System.out.println("connectId - " + connectId);
                 handler.getProtocol().start(connectId, (Connections<T>) connections);
                 connectId++;
                 execute(handler);
