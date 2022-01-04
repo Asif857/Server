@@ -34,7 +34,7 @@ public class ConnectionsImpl<T> implements Connections<String>{
         Iterator ita = userList.iterator();
         while (ita.hasNext()){
             User user = (User) ita.next();
-            if (user.getUserName().equals(userName));
+            if (user.getUserName().equals(userName))
                 return user;
         }
         return null;

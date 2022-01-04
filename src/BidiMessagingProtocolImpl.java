@@ -1,7 +1,5 @@
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.LinkedBlockingQueue;
 
 public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
     private Connections connections = null;
@@ -20,7 +18,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
         if (opcode.equals("01")){
             String userName = cutString(index,message);
             index = index + userName.length() + 1;
-            if (connectionImpl.findUser(userName)==null){
+            if (connectionImpl.findUser(userName)!=null){
                 connections.send(this.connectId,"1101");
                 return;
             }
@@ -205,15 +203,6 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             connectionImpl.send(connectId, ack);
             return;
         }
-//        else if (opcode.equals("09")){
-//
-//        }
-//        else if (opcode.equals("10")){
-//
-//        }
-//        else if (opcode.equals("11")){
-//
-//        }
         else if (opcode.equals("12")){
             String username = cutString(index, message);
             User blockedUser = connectionImpl.findUser(username);
