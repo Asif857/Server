@@ -18,16 +18,25 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
         return null;
     }
     public byte[] encode(String message){
-    int index = 0;
-    String first = message.substring(index,2);
-    index += 2;
-    String second = message.substring(index,4);
-    index +=2;
-    short opcodeClient = Short.valueOf(first);
-    short opcodeServer = Short.valueOf(second);
-    String zero = "\0";
-    byte[] a = shortToBytes(opcodeClient);
-    byte[] b = shortToBytes(opcodeServer);
+        System.out.println("MESSAGE TO ENCODE: " + message);
+        int index = 0;
+        String first = message.substring(index,2);
+        index += 2;
+        String second = "";
+        short opcodeClient = Short.valueOf(first);
+        short opcodeServer;
+        if(opcodeClient == 9){
+            second += message.charAt(2);
+            index++;
+        }
+        else{
+            second = message.substring(index,4);
+            index +=2;
+        }
+        opcodeServer = Short.valueOf(second);
+        String zero = "\0";
+        byte[] a = shortToBytes(opcodeClient);
+        byte[] b = shortToBytes(opcodeServer);
         try(ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             outputStream.write(a);
             outputStream.write(b);
@@ -115,7 +124,7 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
 
     private String cutString(int index,String string){
         String result = "";
-        while (index<string.length() && string.charAt(index)!='/' && string.charAt(index+1)!= '0') {
+        while (index<string.length() && string.charAt(index)!='\0') {
             result = result + string.charAt(index);
             index++;
         }
