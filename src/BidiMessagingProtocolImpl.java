@@ -205,7 +205,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
                 String name = cutString(index, content, '|');
                 if(!name.equals("")) {
                     User user = connectionImpl.findUser(name);
-                    if(user != null){
+                    if(user != null && !user.getBlockedList().contains(currUser) && !currUser.getBlockedList().contains(user)){
                         users.add(user);
                         index += name.length() + 1;
                     }
