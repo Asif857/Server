@@ -1,6 +1,5 @@
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
@@ -66,7 +65,8 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             handler.setUser(user);
             connections.send(this.connectId,"1002");
             while(!user.getReceivedMessages().isEmpty()){
-                this.process(user.getReceivedMessages().poll());
+                int userConnectID = connectionImpl.getConnectionID(user.getConnectionHandler());
+                connectionImpl.send(userConnectID, user.getReceivedMessages().poll());
             }
             return;
         }
@@ -89,7 +89,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
         else if (opcode.equals("04")){
             char follow = message.charAt(index);
             index++;
-            String username = message.substring(index);
+            String username = message.substring(index, message.length()-1);
             User followUser = currUser.findFollowUser(username);
             User requestedUser = connectionImpl.findUser(username);
             if(currUser == null || (follow == '0' && followUser != null)||(follow == '1' && followUser == null) || (follow != '0' && follow != '1') ||requestedUser == null||requestedUser.getBlockedList().contains(currUser)||currUser.getBlockedList().contains(requestedUser)){
@@ -104,7 +104,8 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
                 currUser.getFollowList().remove(requestedUser);
                 requestedUser.decreaseFollowed();
             }
-            connections.send(connectId, "1004" + followUser.getUserName() + "\0");
+            System.out.println("FOLOWED THE USER!");
+            connections.send(connectId, "1004" + requestedUser.getUserName()+'\0');
         }
 
         else if (opcode.equals("05")){
@@ -113,12 +114,15 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
                 return;
             }
             String content = cutString(index, message);
+            System.out.println("Message is: " + message);
             String filteredContent = connectionImpl.filterMsg(content);
+            System.out.println("Filtered message is: " + filteredContent);
             connectionImpl.getMessageList().add(filteredContent);
             LinkedList<String> usernameList = new LinkedList<>();
             for (int i=0; i<content.length()-1;i++){
                 if(i == '@'){
                     String username = cutString(i+1, content, ' ');
+                    System.out.println("MESSAGE SENT TO: " + username);
                     usernameList.add(username);
                 }
             }
@@ -131,11 +135,12 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
                 User user = connectionImpl.findUser(username);
                 if(user != null || !user.getBlockedList().contains(currUser) || currUser.getBlockedList().contains(user)) {
                     if (user.getConnectionHandler() == null) {
-                        user.getReceivedMessages().add("091" + currUser.getUserName() + "\0" + filteredContent + "\0");
-                    } else {
+                        user.getReceivedMessages().add("091" + currUser.getUserName() + '\0' + filteredContent + '\0');
+                    }
+                    else {
                         ConnectionHandlerImpl cHandler = (ConnectionHandlerImpl) user.getConnectionHandler();
                         int connectId = connectionImpl.getConnectionID(cHandler);
-                            connectionImpl.send(connectId, "091" + currUser.getUserName() + "\0" + filteredContent +"\0");
+                            connectionImpl.send(connectId, "091" + currUser.getUserName() + '\0' + filteredContent +'\0');
                         }
                     }
                 }

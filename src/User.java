@@ -2,6 +2,7 @@ import java.nio.ByteBuffer;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.Period;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Iterator;
@@ -84,9 +85,16 @@ public class User {
     }
 
     public int getAge(){
-        LocalDate date = LocalDate.now();
-        LocalDate birthday = LocalDate.parse(this.birthday);
-        return Period.between(birthday, date).getYears();
+        int birthYear = Integer.parseInt(this.getBirthday().substring(getBirthday().length()-4));
+        ZonedDateTime curr_time = ZonedDateTime.now();
+        int currYear = curr_time.getYear();
+        int age = currYear - birthYear;
+        int birthMonth = Integer.parseInt(this.getBirthday().substring(getBirthday().length()-3,getBirthday().length()-5));
+        int currMonth = curr_time.getMonthValue();
+        if(currMonth-birthMonth<0){
+            age--;
+        }
+        return age;
     }
 
     public LinkedList<User> getBlockedList() {

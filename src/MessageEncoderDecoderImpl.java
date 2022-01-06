@@ -18,16 +18,25 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
         return null;
     }
     public byte[] encode(String message){
-    int index = 0;
-    String first = message.substring(index,2);
-    index += 2;
-    String second = message.substring(index,4);
-    index +=2;
-    short opcodeClient = Short.valueOf(first);
-    short opcodeServer = Short.valueOf(second);
-    String zero = "\0";
-    byte[] a = shortToBytes(opcodeClient);
-    byte[] b = shortToBytes(opcodeServer);
+        System.out.println("MESSAGE TO ENCODE: " + message);
+        int index = 0;
+        String first = message.substring(index,2);
+        index += 2;
+        String second = "";
+        short opcodeClient = Short.parseShort(first);
+        short opcodeServer;
+        if(opcodeClient == 9){
+            second += message.charAt(2);
+            index++;
+        }
+        else{
+            second = message.substring(index,4);
+            index +=2;
+        }
+        opcodeServer = Short.parseShort(second);
+        String zero = "\0";
+        byte[] a = shortToBytes(opcodeClient);
+        byte[] b = shortToBytes(opcodeServer);
         try(ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             outputStream.write(a);
             outputStream.write(b);
@@ -38,18 +47,20 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
                 outputStream.write(zero.getBytes());
             }
             else if (opcodeServer==7) {
-                while (index < message.length()) {
+                while (index < message.length()-1) {
                     byte[] ans;
                     for (int i = 0; i < 3; i++) {
+                        index++;
                         String len = cutString(index, message, ' ');
-                        index += len.length()+1;
-                        ans = shortToBytes(Short.valueOf(len));
+                        index += len.length();
+                        ans = shortToBytes(Short.parseShort(len));
                         outputStream.write(ans);
                     }
-                    ans = shortToBytes(Short.valueOf(cutString(index,message)));
-                    index+=1; //last iteration has \0 in it.
-                    outputStream.write(ans);
-                }
+                    index++;
+                    String finalLen = cutString(index, message);
+                    ans = shortToBytes(Short.parseShort(finalLen));
+                    index += finalLen.length()+1;
+                    }
             }
             else if(opcodeServer ==8){
                 while (index < message.length()) {
@@ -77,7 +88,7 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
 
     private void pushByte(byte nextByte) {
         if (len >= bytes.length) {
-            bytes = Arrays.copyOf(bytes, len * 2);
+            bytes = Arrays.copyOf(bytes, len + 1);
         }
 
         bytes[len++] = nextByte;
