@@ -38,7 +38,7 @@ public class ConnectionHandlerImpl<T> implements ConnectionHandler<T>,Runnable{
                     protocol.process(nextMessage); // process is void - we will send the ack and the message in the process itself.
                 }
             }
-
+            this.close();
         } catch (IOException | ParseException ex) {
             ex.printStackTrace();
         }

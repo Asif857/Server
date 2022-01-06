@@ -64,17 +64,20 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
                     }
             }
             else if(opcodeServer ==8){
-                while (index < message.length()) {
+                while (index < message.length()-1) {
                     byte[] ans;
                     for (int i = 0; i < 3; i++) {
+                        index++;
                         String len = cutString(index, message, ' ');
-                        index += len.length()+1;
-                        ans = shortToBytes(Short.valueOf(len));
+                        index += len.length();
+                        ans = shortToBytes(Short.parseShort(len));
                         outputStream.write(ans);
                     }
-                    ans = shortToBytes(Short.valueOf(cutString(index,message)));
-                    index+=1; //last iteration has \0 in it.
+                    index++;
+                    String finalLen = cutString(index, message);
+                    ans = shortToBytes(Short.parseShort(finalLen));
                     outputStream.write(ans);
+                    index+= finalLen.length();
                 }
             }
             outputStream.write(";".getBytes());

@@ -18,6 +18,7 @@ public class User {
     private LinkedList<String> postedMessages;
     private LinkedBlockingQueue<String> receivedMessages;
     private LinkedList<User> blockedList;
+    private LinkedBlockingQueue<User> followedByList;
     private int followed = 0;
 
     public User(String userName, String password, String birthday) {
@@ -28,6 +29,7 @@ public class User {
         this.postedMessages = new LinkedList<>();
         this.receivedMessages = new LinkedBlockingQueue<>();
         this.blockedList = new LinkedList<>();
+        this.followedByList = new LinkedBlockingQueue<>();
     }
 
     public String getUserName() {
@@ -55,11 +57,12 @@ public class User {
     }
 
     public User findFollowUser(String username){
-        Iterator ita = followList.iterator();
+        Iterator<User> ita = followList.iterator();
         while (ita.hasNext()){
-            User user = (User) ita.next();
-            if (user.getUserName().equals(userName));
+            User user = ita.next();
+            if (user.getUserName().equals(username)){
             return user;
+            }
         }
         return null;
     }
@@ -103,5 +106,9 @@ public class User {
 
     public LinkedList<User> getBlockedList() {
         return blockedList;
+    }
+
+    public LinkedBlockingQueue<User> getFollowedByList() {
+        return followedByList;
     }
 }
