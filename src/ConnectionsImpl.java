@@ -68,7 +68,7 @@ public class ConnectionsImpl<T> implements Connections<String>{
     }
     public String filterMsg(String msg) {
         for (String filter : filterList){
-                msg.replace(filter,"<filtered>");
+                msg = msg.replace(filter,"<filtered>");
         }
         return msg;
     }

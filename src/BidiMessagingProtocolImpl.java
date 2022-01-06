@@ -1,8 +1,6 @@
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Objects;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.LinkedBlockingQueue;
+
 
 public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
     private Connections connections = null;
@@ -116,18 +114,12 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
                 return;
             }
             String content = cutString(index, message);
-            System.out.println("Message is: " + message);
             String filteredContent = connectionImpl.filterMsg(content);
-            System.out.println("Filtered message is: " + filteredContent);
             connectionImpl.getMessageList().add(filteredContent);
-            for(Object post: connectionImpl.getMessageList()){
-                System.out.println(post);
-            }
             LinkedList<String> usernameList = new LinkedList<>();
             for (int i=0; i<content.length()-1;i++){
                 if(i == '@'){
                     String username = cutString(i+1, content, ' ');
-                    System.out.println("MESSAGE SENT TO: " + username);
                     usernameList.add(username);
                 }
             }
@@ -150,6 +142,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
                     }
                 }
             connectionImpl.send(connectId, "1005");
+            currUser.increasePostedMessages();
             return;
         }
         else if (opcode.equals("06")){
@@ -158,16 +151,21 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             String content = cutString(index, message);
             index += content.length() +1;
             String dateTime = cutString(index, message);
-            User recievedUser = connectionImpl.findUser(username);
-            if(currUser == null || recievedUser == null || !currUser.getFollowList().contains(recievedUser) || currUser.getBlockedList().contains(recievedUser) ||recievedUser.getBlockedList().contains(currUser)){
+            User receivedUser = connectionImpl.findUser(username);
+            System.out.println("User to receiver is - " + currUser.getUserName());
+            if(currUser == null || receivedUser == null || !currUser.getFollowList().contains(receivedUser) || currUser.getBlockedList().contains(receivedUser) ||receivedUser.getBlockedList().contains(currUser)){
                 connectionImpl.send(connectId, "1106");
                 return;
             }
             String filteredContent = connectionImpl.filterMsg(content);
             connectionImpl.getMessageList().add(filteredContent);
-            ConnectionHandlerImpl receivedHandler = (ConnectionHandlerImpl) receivedUser.getConnectionHandler();
+            ConnectionHandlerImpl receivedHandler = (ConnectionHandlerImpl)receivedUser.getConnectionHandler();
             int receivedID  = connectionImpl.getConnectionID(receivedHandler);
-            connectionImpl.send(receivedID, "090" + currUser.getUserName() + '\0' + filteredContent + '\0');
+            if(!connectionImpl.send(receivedID, "090" + currUser.getUserName() + '\0' + filteredContent + '\0')){
+                String notify = "090" + currUser.getUserName() + '\0' + filteredContent + '\0';
+                receivedUser.getReceivedMessages().add(notify);
+                System.out.println("message is: " + notify);
+            }
             connectionImpl.send(connectId, "1006");
             return;
         }
@@ -182,7 +180,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
                 User user = (User) iterator.next();
                 if(!user.equals(currUser) || !currUser.getBlockedList().contains(user)|| !user.getBlockedList().contains(currUser)) {
                     String age = Integer.toString(user.getAge());
-                    String numPosts = Integer.toString(user.getPostedMessages().size());
+                    String numPosts = Integer.toString(user.getPostedMessages());
                     String numFollowers = Integer.toString(user.getFollowed());
                     String numFollowing = Integer.toString(user.getFollowList().size());
                     ack += age + " " + numPosts + " " + numFollowers + " " + numFollowing + '\0';
@@ -217,7 +215,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             String ack = "1008 ";
             for(User statUser : users){
                 String age = Integer.toString(statUser.getAge());
-                String numPosts = Integer.toString(statUser.getPostedMessages().size());
+                String numPosts = Integer.toString(statUser.getPostedMessages());
                 String followers = Integer.toString(statUser.getFollowed());
                 String following = Integer.toString(statUser.getFollowList().size());
                 ack += age + " " + numPosts + " " + followers + " " + following + "\0";
@@ -228,6 +226,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
         }
         else if (opcode.equals("12")){
             String username = cutString(index, message);
+            System.out.println("Username to block is: " + username);
             User blockedUser = connectionImpl.findUser(username);
             if(currUser == null || blockedUser == null||currUser.getBlockedList().contains(blockedUser)){
                 connectionImpl.send(connectId, "1112");
@@ -243,13 +242,12 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             }
 
         }
-
-
-
     }
+
     public boolean shouldTerminate() {
         return terminate;
     }
+
     private String cutString(int index,String string){
         String result = "";
         while (index<string.length() && string.charAt(index)!='\0'){

@@ -18,7 +18,7 @@ public class User {
     private ConnectionHandler connectionHandler;
     private LinkedList<User> followList;
     private LinkedBlockingQueue<User> followedByList;
-    private LinkedList<String> postedMessages;
+    private int postedMessages;
     private LinkedBlockingQueue<String> receivedMessages;
     private LinkedList<User> blockedList;
     private int followed = 0;
@@ -28,7 +28,7 @@ public class User {
         this.password = password;
         this.birthday = birthday;
         this.followList = new LinkedList<>();
-        this.postedMessages = new LinkedList<>();
+        this.postedMessages = 0;
         this.receivedMessages = new LinkedBlockingQueue<>();
         this.blockedList = new LinkedList<>();
         this.followedByList = new LinkedBlockingQueue<>();
@@ -72,9 +72,6 @@ public class User {
         return null;
     }
 
-    public LinkedList<String> getPostedMessages() {
-        return postedMessages;
-    }
 
     public LinkedBlockingQueue<String> getReceivedMessages() {
         return receivedMessages;
@@ -107,5 +104,13 @@ public class User {
 
     public LinkedList<User> getBlockedList() {
         return blockedList;
+    }
+
+    public int getPostedMessages() {
+        return postedMessages;
+    }
+
+    public void increasePostedMessages(){
+        this.postedMessages += 1;
     }
 }
