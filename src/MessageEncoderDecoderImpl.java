@@ -115,7 +115,7 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
 
     private String cutString(int index,String string){
         String result = "";
-        while (index<string.length() && string.charAt(index)!='/' && string.charAt(index+1)!= '0') {
+        while (index<string.length() && string.charAt(index)!='\0') {
             result = result + string.charAt(index);
             index++;
         }

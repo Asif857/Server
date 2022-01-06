@@ -71,10 +71,6 @@ public class User {
         return receivedMessages;
     }
 
-    public void receiveMessage(String message){
-        this.receivedMessages.add(message);
-    }
-
     public int getFollowed() {
         return followed;
     }

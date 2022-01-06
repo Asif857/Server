@@ -92,7 +92,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             String username = message.substring(index);
             User followUser = currUser.findFollowUser(username);
             User requestedUser = connectionImpl.findUser(username);
-            if(currUser == null || (follow == '0' && followUser != null)||(follow == '1' && followUser == null) || follow != '0' ||follow != '1'||requestedUser == null||requestedUser.getBlockedList().contains(currUser)||currUser.getBlockedList().contains(requestedUser)){
+            if(currUser == null || (follow == '0' && followUser != null)||(follow == '1' && followUser == null) || (follow != '0' && follow != '1') ||requestedUser == null||requestedUser.getBlockedList().contains(currUser)||currUser.getBlockedList().contains(requestedUser)){
                 connections.send(this.connectId, "1104");
                 return;
             }
@@ -104,7 +104,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
                 currUser.getFollowList().remove(requestedUser);
                 requestedUser.decreaseFollowed();
             }
-            connections.send(connectId, "1104" + followUser.getUserName() + "\0");
+            connections.send(connectId, "1004" + followUser.getUserName() + "\0");
         }
 
         else if (opcode.equals("05")){

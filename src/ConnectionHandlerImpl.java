@@ -42,6 +42,8 @@ public class ConnectionHandlerImpl<T> implements ConnectionHandler<T>,Runnable{
         } catch (IOException | ParseException ex) {
             ex.printStackTrace();
         }
+        System.out.println(connected);
+        System.out.println("Terminated");
 
     }
     public void send(T msg) {
