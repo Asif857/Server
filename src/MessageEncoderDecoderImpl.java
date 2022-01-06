@@ -39,7 +39,12 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
         byte[] b = shortToBytes(opcodeServer);
         try(ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             outputStream.write(a);
-            outputStream.write(b);
+            if (opcodeClient==9) {
+                outputStream.write(opcodeServer);
+            }
+            else {
+                outputStream.write(b);
+            }
             //we have the first 2 shorts as bytes.
             if (opcodeServer==4){
                 String userName = cutString(index,message);
