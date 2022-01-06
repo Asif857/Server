@@ -59,7 +59,8 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
                     index++;
                     String finalLen = cutString(index, message);
                     ans = shortToBytes(Short.parseShort(finalLen));
-                    index += finalLen.length()+1;
+                    outputStream.write(ans);
+                    index += finalLen.length();
                     }
             }
             else if(opcodeServer ==8){
@@ -127,7 +128,7 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
     private String cutString(int index,String string){
         String result = "";
         while (index<string.length() && string.charAt(index)!='\0') {
-            result = result + string.charAt(index);
+            result += string.charAt(index);
             index++;
         }
         return result;
