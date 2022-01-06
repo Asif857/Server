@@ -101,13 +101,11 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             }
             if(follow == '0'){
                 currUser.getFollowList().add(requestedUser);
-                requestedUser.getFollowedByList().add(currUser);
                 requestedUser.increaseFollowed();
                 requestedUser.getFollowedByList().add(currUser);
             }
             else {
                 currUser.getFollowList().remove(requestedUser);
-                requestedUser.getFollowedByList().remove(currUser);
                 requestedUser.decreaseFollowed();
                 requestedUser.getFollowedByList().remove(currUser);
             }
@@ -127,7 +125,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             connectionImpl.getMessageList().add(filteredContent);
             LinkedList<String> usernameList = new LinkedList<>();
             for (int i=0; i<content.length()-1;i++){
-                if(i == '@'){
+                if(content.charAt(i) == '@'){
                     String username = cutString(i+1, content, ' ');
                     System.out.println("MESSAGE SENT TO: " + username);
                     usernameList.add(username);
@@ -142,12 +140,12 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
                 User user = connectionImpl.findUser(username);
                 if(user != null && !user.getBlockedList().contains(currUser) && !currUser.getBlockedList().contains(user)) {
                     if (user.getConnectionHandler() == null) {
-                        user.getReceivedMessages().add("091" + currUser.getUserName() + '\0' + filteredContent + '\0');
+                        user.getReceivedMessages().add("09" + '1' + currUser.getUserName() + '\0' + filteredContent + '\0');
                     }
                     else {
                         ConnectionHandlerImpl cHandler = (ConnectionHandlerImpl) user.getConnectionHandler();
                         int connectId = connectionImpl.getConnectionID(cHandler);
-                            connectionImpl.send(connectId, "091" + currUser.getUserName() + '\0' + filteredContent +'\0');
+                            connectionImpl.send(connectId, "09" + '1' + currUser.getUserName() + '\0' + filteredContent +'\0');
                         }
                     }
                 }
@@ -169,7 +167,9 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             connectionImpl.getMessageList().add(filteredContent);
             ConnectionHandlerImpl receivedHandler = (ConnectionHandlerImpl) receivedUser.getConnectionHandler();
             int receivedID  = connectionImpl.getConnectionID(receivedHandler);
-            connectionImpl.send(receivedID, "090" + currUser.getUserName() + '\0' + filteredContent + '\0');
+            if (!connectionImpl.send(receivedID, "09"+ '0' + currUser.getUserName() + '\0' + filteredContent + '\0')){
+                receivedUser.getReceivedMessages().add("09" + '0' + currUser.getUserName() + '\0' + filteredContent + '\0');
+            }
             connectionImpl.send(connectId, "1006");
             return;
         }
@@ -238,9 +238,11 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             connectionImpl.send(connectId, "1012");
             if(currUser.getFollowList().remove(blockedUser)){
                 blockedUser.decreaseFollowed();
+                currUser.getFollowedByList().remove(blockedUser);
             }
             if(blockedUser.getFollowList().remove(currUser)){
                 currUser.decreaseFollowed();
+                blockedUser.getFollowedByList().remove(currUser);
             }
 
         }
