@@ -7,6 +7,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class User {
@@ -15,6 +17,7 @@ public class User {
     private String birthday;
     private ConnectionHandler connectionHandler;
     private LinkedList<User> followList;
+    private LinkedBlockingQueue<User> followedByList;
     private LinkedList<String> postedMessages;
     private LinkedBlockingQueue<String> receivedMessages;
     private LinkedList<User> blockedList;
@@ -28,6 +31,7 @@ public class User {
         this.postedMessages = new LinkedList<>();
         this.receivedMessages = new LinkedBlockingQueue<>();
         this.blockedList = new LinkedList<>();
+        this.followedByList = new LinkedBlockingQueue<>();
     }
 
     public String getUserName() {
@@ -40,6 +44,10 @@ public class User {
 
     public String getBirthday() {
         return birthday;
+    }
+
+    public LinkedBlockingQueue<User> getFollowedByList() {
+        return followedByList;
     }
 
     public ConnectionHandler getConnectionHandler() {
@@ -58,7 +66,7 @@ public class User {
         Iterator ita = followList.iterator();
         while (ita.hasNext()){
             User user = (User) ita.next();
-            if (user.getUserName().equals(userName));
+            if (user.getUserName().equals(username))
             return user;
         }
         return null;

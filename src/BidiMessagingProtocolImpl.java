@@ -63,10 +63,12 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
                 return;
             }
             handler.setUser(user);
+            user.setConnectionHandler(handler);
             connections.send(this.connectId,"1002");
+            System.out.println(user.getReceivedMessages().size() + " number of received messages");
             while(!user.getReceivedMessages().isEmpty()){
                 int userConnectID = connectionImpl.getConnectionID(user.getConnectionHandler());
-                connectionImpl.send(userConnectID, user.getReceivedMessages().poll());
+                connections.send(userConnectID, user.getReceivedMessages().poll());
             }
             return;
         }
@@ -99,10 +101,12 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             if(follow == '0'){
                 currUser.getFollowList().add(requestedUser);
                 requestedUser.increaseFollowed();
+                requestedUser.getFollowedByList().add(currUser);
             }
             else {
                 currUser.getFollowList().remove(requestedUser);
                 requestedUser.decreaseFollowed();
+                requestedUser.getFollowedByList().remove(currUser);
             }
             System.out.println("FOLOWED THE USER!");
             connections.send(connectId, "1004" + requestedUser.getUserName()+'\0');
@@ -126,14 +130,14 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
                     usernameList.add(username);
                 }
             }
-            for(User user: currUser.getFollowList()){
+            for(User user: currUser.getFollowedByList()){
                 if(!usernameList.contains(user.getUserName())){
                     usernameList.add(user.getUserName());
                 }
             }
             for(String username: usernameList){
                 User user = connectionImpl.findUser(username);
-                if(user != null || !user.getBlockedList().contains(currUser) || currUser.getBlockedList().contains(user)) {
+                if(user != null && !user.getBlockedList().contains(currUser) && !currUser.getBlockedList().contains(user)) {
                     if (user.getConnectionHandler() == null) {
                         user.getReceivedMessages().add("091" + currUser.getUserName() + '\0' + filteredContent + '\0');
                     }
@@ -153,16 +157,16 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             String content = cutString(index, message);
             index += content.length() +1;
             String dateTime = cutString(index, message);
-            User recievedUser = connectionImpl.findUser(username);
-            if(currUser == null || recievedUser == null || !currUser.getFollowList().contains(recievedUser) || currUser.getBlockedList().contains(recievedUser) ||recievedUser.getBlockedList().contains(currUser)){
+            User receivedUser = connectionImpl.findUser(username);
+            if(currUser == null || receivedUser == null || !currUser.getFollowList().contains(receivedUser) || currUser.getBlockedList().contains(receivedUser) ||receivedUser.getBlockedList().contains(currUser)){
                 connectionImpl.send(connectId, "1106");
                 return;
             }
             String filteredContent = connectionImpl.filterMsg(content);
             connectionImpl.getMessageList().add(filteredContent);
-            ConnectionHandlerImpl recievedHandler = (ConnectionHandlerImpl) recievedUser.getConnectionHandler();
-            int receivedID  = connectionImpl.getConnectionID(recievedHandler);
-            connectionImpl.send(receivedID, "090" + currUser.getUserName() + "\0" + filteredContent + "\0");
+            ConnectionHandlerImpl receivedHandler = (ConnectionHandlerImpl) receivedUser.getConnectionHandler();
+            int receivedID  = connectionImpl.getConnectionID(receivedHandler);
+            connectionImpl.send(receivedID, "090" + currUser.getUserName() + '\0' + filteredContent + '\0');
             connectionImpl.send(connectId, "1006");
             return;
         }

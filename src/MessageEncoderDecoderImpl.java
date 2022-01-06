@@ -46,7 +46,7 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
                 outputStream.write(userName.getBytes()); //uses UTF-8 by default.
                 outputStream.write(zero.getBytes());
             }
-            else if (opcodeServer==7) {
+            else if (opcodeServer==7 || opcodeServer==8) {
                 while (index < message.length()-1) {
                     byte[] ans;
                     for (int i = 0; i < 3; i++) {
@@ -59,22 +59,18 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
                     index++;
                     String finalLen = cutString(index, message);
                     ans = shortToBytes(Short.parseShort(finalLen));
-                    index += finalLen.length()+1;
+                    index += finalLen.length();
+                    outputStream.write(ans);
                     }
             }
-            else if(opcodeServer ==8){
-                while (index < message.length()) {
-                    byte[] ans;
-                    for (int i = 0; i < 3; i++) {
-                        String len = cutString(index, message, ' ');
-                        index += len.length()+1;
-                        ans = shortToBytes(Short.valueOf(len));
-                        outputStream.write(ans);
-                    }
-                    ans = shortToBytes(Short.valueOf(cutString(index,message)));
-                    index+=1; //last iteration has \0 in it.
-                    outputStream.write(ans);
-                }
+            if (opcodeClient==9) {
+                String postingUser = cutString(index, message);
+                index += postingUser.length() + 1;
+                outputStream.write(postingUser.getBytes());
+                outputStream.write(zero.getBytes());
+                String content = cutString(index, message);
+                outputStream.write(content.getBytes());
+                outputStream.write(zero.getBytes());
             }
             outputStream.write(";".getBytes());
             byte[] byteArray=outputStream.toByteArray();
