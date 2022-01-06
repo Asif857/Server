@@ -94,17 +94,20 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             String username = message.substring(index, message.length()-1);
             User followUser = currUser.findFollowUser(username);
             User requestedUser = connectionImpl.findUser(username);
-            if(currUser == null || (follow == '0' && followUser != null)||(follow == '1' && followUser == null) || (follow != '0' && follow != '1') ||requestedUser == null||requestedUser.getBlockedList().contains(currUser)||currUser.getBlockedList().contains(requestedUser)){
+            System.out.println(requestedUser.getUserName());
+            if(currUser == null || (follow == '0' && followUser != null)||(follow == '1' && followUser == null) ||requestedUser == null||requestedUser.getBlockedList().contains(currUser)||currUser.getBlockedList().contains(requestedUser)){
                 connections.send(this.connectId, "1104");
                 return;
             }
             if(follow == '0'){
                 currUser.getFollowList().add(requestedUser);
+                requestedUser.getFollowedByList().add(currUser);
                 requestedUser.increaseFollowed();
                 requestedUser.getFollowedByList().add(currUser);
             }
             else {
                 currUser.getFollowList().remove(requestedUser);
+                requestedUser.getFollowedByList().remove(currUser);
                 requestedUser.decreaseFollowed();
                 requestedUser.getFollowedByList().remove(currUser);
             }
@@ -220,6 +223,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
                 String following = Integer.toString(statUser.getFollowList().size());
                 ack += age + " " + numPosts + " " + followers + " " + following + "\0";
             }
+            System.out.println(ack);
             connectionImpl.send(connectId, ack);
             return;
         }
