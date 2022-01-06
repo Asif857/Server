@@ -166,7 +166,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             connectionImpl.getMessageList().add(filteredContent);
             ConnectionHandlerImpl recievedHandler = (ConnectionHandlerImpl) recievedUser.getConnectionHandler();
             int receivedID  = connectionImpl.getConnectionID(recievedHandler);
-            connectionImpl.send(receivedID, "090" + currUser.getUserName() + "\0" + filteredContent + "\0");
+            connectionImpl.send(receivedID, "090" + currUser.getUserName() + '\0' + filteredContent + '\0');
             connectionImpl.send(connectId, "1006");
             return;
         }

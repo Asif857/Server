@@ -80,6 +80,15 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
                     index+= finalLen.length();
                 }
             }
+            if(opcodeClient==9){
+                String recievingUsername = cutString(index, message);
+                index += recievingUsername.length()+1;
+                outputStream.write(recievingUsername.getBytes());
+                outputStream.write(zero.getBytes());
+                String content = cutString(index, message);
+                outputStream.write(content.getBytes());
+                outputStream.write(zero.getBytes());
+            }
             outputStream.write(";".getBytes());
             byte[] byteArray=outputStream.toByteArray();
             return byteArray;
