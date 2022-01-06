@@ -46,7 +46,7 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
                 outputStream.write(userName.getBytes()); //uses UTF-8 by default.
                 outputStream.write(zero.getBytes());
             }
-            else if (opcodeServer==7) {
+            else if (opcodeServer==7 || opcodeServer==8) {
                 while (index < message.length()-1) {
                     byte[] ans;
                     for (int i = 0; i < 3; i++) {
@@ -59,26 +59,18 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
                     index++;
                     String finalLen = cutString(index, message);
                     ans = shortToBytes(Short.parseShort(finalLen));
-                    outputStream.write(ans);
                     index += finalLen.length();
+                    outputStream.write(ans);
                     }
             }
-            else if(opcodeServer ==8){
-                while (index < message.length()-1) {
-                    byte[] ans;
-                    for (int i = 0; i < 3; i++) {
-                        index++;
-                        String len = cutString(index, message, ' ');
-                        index += len.length();
-                        ans = shortToBytes(Short.parseShort(len));
-                        outputStream.write(ans);
-                    }
-                    index++;
-                    String finalLen = cutString(index, message);
-                    ans = shortToBytes(Short.parseShort(finalLen));
-                    outputStream.write(ans);
-                    index+= finalLen.length();
-                }
+            if (opcodeClient==9) {
+                String postingUser = cutString(index, message);
+                index += postingUser.length() + 1;
+                outputStream.write(postingUser.getBytes());
+                outputStream.write(zero.getBytes());
+                String content = cutString(index, message);
+                outputStream.write(content.getBytes());
+                outputStream.write(zero.getBytes());
             }
             if(opcodeClient==9){
                 String recievingUsername = cutString(index, message);
@@ -140,7 +132,7 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
     private String cutString(int index,String string){
         String result = "";
         while (index<string.length() && string.charAt(index)!='\0') {
-            result += string.charAt(index);
+            result = result + string.charAt(index);
             index++;
         }
         return result;

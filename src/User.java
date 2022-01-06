@@ -7,6 +7,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class User {
@@ -15,10 +17,10 @@ public class User {
     private String birthday;
     private ConnectionHandler connectionHandler;
     private LinkedList<User> followList;
+    private LinkedBlockingQueue<User> followedByList;
     private LinkedList<String> postedMessages;
     private LinkedBlockingQueue<String> receivedMessages;
     private LinkedList<User> blockedList;
-    private LinkedBlockingQueue<User> followedByList;
     private int followed = 0;
 
     public User(String userName, String password, String birthday) {
@@ -44,6 +46,10 @@ public class User {
         return birthday;
     }
 
+    public LinkedBlockingQueue<User> getFollowedByList() {
+        return followedByList;
+    }
+
     public ConnectionHandler getConnectionHandler() {
         return connectionHandler;
     }
@@ -57,12 +63,11 @@ public class User {
     }
 
     public User findFollowUser(String username){
-        Iterator<User> ita = followList.iterator();
+        Iterator ita = followList.iterator();
         while (ita.hasNext()){
-            User user = ita.next();
-            if (user.getUserName().equals(username)){
+            User user = (User) ita.next();
+            if (user.getUserName().equals(username))
             return user;
-            }
         }
         return null;
     }
@@ -73,10 +78,6 @@ public class User {
 
     public LinkedBlockingQueue<String> getReceivedMessages() {
         return receivedMessages;
-    }
-
-    public void receiveMessage(String message){
-        this.receivedMessages.add(message);
     }
 
     public int getFollowed() {
@@ -106,9 +107,5 @@ public class User {
 
     public LinkedList<User> getBlockedList() {
         return blockedList;
-    }
-
-    public LinkedBlockingQueue<User> getFollowedByList() {
-        return followedByList;
     }
 }
