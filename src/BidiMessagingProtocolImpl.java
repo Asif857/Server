@@ -185,6 +185,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
                     System.out.println(ack);
                 }
             }
+            System.out.println("Message to send is: " + ack);
             connectionImpl.send(connectId, ack);
             return;
         }

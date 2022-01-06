@@ -92,7 +92,13 @@ public class User {
         int birthYear = Integer.parseInt(this.getBirthday().substring(getBirthday().length()-4));
         ZonedDateTime curr_time = ZonedDateTime.now();
         int currYear = curr_time.getYear();
-        return currYear - birthYear;
+        int age = currYear - birthYear;
+        int birthMonth = Integer.parseInt(this.getBirthday().substring(getBirthday().length()-3,getBirthday().length()-5));
+        int currMonth = curr_time.getMonthValue();
+        if(currMonth-birthMonth<0){
+            age--;
+        }
+        return age;
     }
 
     public LinkedList<User> getBlockedList() {
