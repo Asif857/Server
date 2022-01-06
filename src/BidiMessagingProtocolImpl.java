@@ -175,9 +175,9 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             Iterator iterator = connectionImpl.getUserList().iterator();
             while(iterator.hasNext()){
                 User user = (User) iterator.next();
-                if(!user.equals(currUser) || !currUser.getBlockedList().contains(user)|| !user.getBlockedList().contains(currUser)) {
+                if(!user.equals(currUser) && !currUser.getBlockedList().contains(user) && !user.getBlockedList().contains(currUser)) {
                     String age = Integer.toString(user.getAge());
-                    String numPosts = Integer.toString(user.getPostedMessages().size());
+                    String numPosts = Integer.toString(user.getPostedMessages());
                     String numFollowers = Integer.toString(user.getFollowed());
                     String numFollowing = Integer.toString(user.getFollowList().size());
                     ack += age + " " + numPosts + " " + numFollowers + " " + numFollowing + "\0";
@@ -211,7 +211,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             String ack = "1008 ";
             for(User statUser : users){
                 String age = Integer.toString(statUser.getAge());
-                String numPosts = Integer.toString(statUser.getPostedMessages().size());
+                String numPosts = Integer.toString(statUser.getPostedMessages());
                 String followers = Integer.toString(statUser.getFollowed());
                 String following = Integer.toString(statUser.getFollowList().size());
                 ack += age + " " + numPosts + " " + followers + " " + following + "\0";
