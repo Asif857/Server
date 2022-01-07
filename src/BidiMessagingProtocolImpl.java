@@ -87,10 +87,11 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             char follow = message.charAt(index);
             index++;
             String username = message.substring(index, message.length()-1);
-            User followUser = currUser.findFollowUser(username);
+            User followUser = null;
+            if (currUser!=null)
+                currUser.findFollowUser(username);
             User requestedUser = connectionImpl.findUser(username);
-            System.out.println(requestedUser.getUserName());
-            if(currUser == null || (follow == '0' && followUser != null)||(follow == '1' && followUser == null) ||requestedUser == null||requestedUser.getBlockedList().contains(currUser)||currUser.getBlockedList().contains(requestedUser)){
+            if(currUser == null || requestedUser == currUser || (follow == '0' && followUser != null)||(follow == '1' && followUser == null) ||requestedUser == null||requestedUser.getBlockedList().contains(currUser)||currUser.getBlockedList().contains(requestedUser)){
                 connections.send(this.connectId, "1104");
                 return;
             }
