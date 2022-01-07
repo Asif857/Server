@@ -11,7 +11,6 @@ public class ConnectionHandlerImpl<T> implements ConnectionHandler<T>,Runnable{
     private BufferedInputStream in;
     private BufferedOutputStream out;
     private volatile boolean connected = true;
-    private User user=null;
     public ConnectionHandlerImpl(Socket sock, MessageEncoderDecoder<T> reader, BidiMessagingProtocol<T> protocol) {
         this.sock = sock;
         this.encdec = reader;
@@ -60,23 +59,5 @@ public class ConnectionHandlerImpl<T> implements ConnectionHandler<T>,Runnable{
 
     public BidiMessagingProtocol<T> getProtocol() {
         return protocol;
-    }
-    public void setUser(User user){
-        this.user=user;
-    }
-    public User getUser(){
-        return user;
-    }
-
-    public BufferedInputStream getIn() {
-        return in;
-    }
-
-    public BufferedOutputStream getOut() {
-        return out;
-    }
-
-    public Socket getSock() {
-        return sock;
     }
 }

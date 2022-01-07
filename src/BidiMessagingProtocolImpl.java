@@ -13,8 +13,8 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
     public void process(String message) {
         System.out.println(message);
         ConnectionsImpl connectionImpl = (ConnectionsImpl) connections;
-        ConnectionHandlerImpl handler = (ConnectionHandlerImpl) connectionImpl.getHandler(connectId);
-        User currUser = handler.getUser();
+        ConnectionHandler handler = connectionImpl.getHandler(connectId);
+        User currUser = connectionImpl.findByHandler(handler);
         int index =2;
         String opcode = message.substring(0,2);
         if (opcode.equals("01")){
@@ -45,7 +45,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             User user = connectionImpl.findUser(userName);
             if (user!=null) {
                 synchronized (user) {
-                    if (!user.getPassword().equals(password) || captcha == '0' || user.getConnectionHandler() != null || handler.getUser() != null) {
+                    if (!user.getPassword().equals(password) || captcha == '0' || user.getConnectionHandler() != null || currUser!=null) {
                         connections.send(this.connectId, "1102");
                         return;
                     }
@@ -58,8 +58,6 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
                 connections.send(this.connectId, "1102");
                 return;
             }
-            handler.setUser(user);
-            user.setConnectionHandler(handler);
             connections.send(this.connectId,"1002");
             while(!user.getReceivedMessages().isEmpty()){
                 int userConnectID = connectionImpl.getConnectionID(user.getConnectionHandler());
@@ -69,13 +67,11 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
         }
 
         else if (opcode.equals("03")){
-            if (handler.getUser()==null) {
+            if (currUser==null) {
                 connections.send(this.connectId, "1103");
                 return;
             }
-            User user = handler.getUser();
-            user.setConnectionHandler(null);
-            handler.setUser(null);
+            currUser.setConnectionHandler(null);
             System.out.println("User has logged out!");
             connections.send(this.connectId,"1003");
             this.terminate = true;
@@ -89,7 +85,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             String username = message.substring(index, message.length()-1);
             User followUser = null;
             if (currUser!=null)
-                currUser.findFollowUser(username);
+                followUser = currUser.findFollowUser(username);
             User requestedUser = connectionImpl.findUser(username);
             if(currUser == null || requestedUser == currUser || (follow == '0' && followUser != null)||(follow == '1' && followUser == null) ||requestedUser == null||requestedUser.getBlockedList().contains(currUser)||currUser.getBlockedList().contains(requestedUser)){
                 connections.send(this.connectId, "1104");
@@ -129,19 +125,20 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
                     usernameList.add(user.getUserName());
                 }
             }
-            for(String username: usernameList){
-                User user = connectionImpl.findUser(username);
-                if(user != null && !user.getBlockedList().contains(currUser) && !currUser.getBlockedList().contains(user)) {
-                    if (user.getConnectionHandler() == null) {
-                        user.getReceivedMessages().add("09" + '1' + currUser.getUserName() + '\0' + filteredContent + '\0');
-                    }
-                    else {
-                        ConnectionHandlerImpl cHandler = (ConnectionHandlerImpl) user.getConnectionHandler();
-                        int connectId = connectionImpl.getConnectionID(cHandler);
-                            connectionImpl.send(connectId, "09" + '1' + currUser.getUserName() + '\0' + filteredContent +'\0');
+            for(String username: usernameList) {
+                if (!username.equals(currUser.getUserName())) {
+                    User user = connectionImpl.findUser(username);
+                    if (user != null && !user.getBlockedList().contains(currUser) && !currUser.getBlockedList().contains(user)) {
+                        if (user.getConnectionHandler() == null) {
+                            user.getReceivedMessages().add("09" + '1' + currUser.getUserName() + '\0' + filteredContent + '\0');
+                        } else {
+                            ConnectionHandler cHandler = user.getConnectionHandler();
+                            int connectId = connectionImpl.getConnectionID(cHandler);
+                            connectionImpl.send(connectId, "09" + '1' + currUser.getUserName() + '\0' + filteredContent + '\0');
                         }
                     }
                 }
+            }
             connectionImpl.send(connectId, "1005");
             currUser.increasePostedMessages();
             return;
@@ -159,7 +156,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
             }
             String filteredContent = connectionImpl.filterMsg(content);
             connectionImpl.getMessageList().add(filteredContent);
-            ConnectionHandlerImpl receivedHandler = (ConnectionHandlerImpl) receivedUser.getConnectionHandler();
+            ConnectionHandler receivedHandler = receivedUser.getConnectionHandler();
             int receivedID  = connectionImpl.getConnectionID(receivedHandler);
             if (!connectionImpl.send(receivedID, "09"+ '0' + currUser.getUserName() + '\0' + filteredContent + '\0')){
                 receivedUser.getReceivedMessages().add("09" + '0' + currUser.getUserName() + '\0' + filteredContent + '\0');
@@ -224,7 +221,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String>{
         else if (opcode.equals("12")){
             String username = cutString(index, message);
             User blockedUser = connectionImpl.findUser(username);
-            if(currUser == null || blockedUser == null||currUser.getBlockedList().contains(blockedUser)){
+            if(currUser == null || currUser==blockedUser || blockedUser == null||currUser.getBlockedList().contains(blockedUser)){
                 connectionImpl.send(connectId, "1112");
                 return;
             }

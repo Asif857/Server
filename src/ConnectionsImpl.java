@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class ConnectionsImpl<T> implements Connections<String>{
+public class ConnectionsImpl<T> implements Connections<T>{
     private ConcurrentHashMap<Integer,ConnectionHandler<T>> handlerMap;
     private LinkedBlockingDeque<User> userList;
     private LinkedBlockingQueue<String> messageList;
@@ -59,10 +59,10 @@ public class ConnectionsImpl<T> implements Connections<String>{
         return this.userList;
     }
 
-    public boolean send(int connectionId, String msg) {
+    public boolean send(int connectionId, T msg) {
         if (!handlerMap.containsKey(connectionId))
         return false;
-        ConnectionHandlerImpl handler = (ConnectionHandlerImpl) handlerMap.get(connectionId);
+        ConnectionHandler handler = handlerMap.get(connectionId);
         handler.send(msg);
         return true;
     }
@@ -73,18 +73,29 @@ public class ConnectionsImpl<T> implements Connections<String>{
         return msg;
     }
 
-    @Override
-    public void broadcast(String msg) {
-        //Find out why we need this
+    public void broadcast(T msg) {
+        for (Map.Entry<Integer,ConnectionHandler <T>> entry : this.getHandlerMap().entrySet()){
+            entry.getValue().send(msg);
+        }
     }
 
     @Override
     public void disconnect(int connectionId) {
-        ConnectionHandler handler = this.getHandler(connectionId);
         this.getHandlerMap().remove(connectionId);
     }
 
     public LinkedBlockingQueue<String> getMessageList() {
         return messageList;
     }
+
+    public User findByHandler(ConnectionHandler handler){
+        if (handler!=null) {
+            for (User user : userList) {
+                if (user.getConnectionHandler() == handler)
+                    return user;
+            }
+        }
+            return null;
+    }
+
 }

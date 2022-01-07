@@ -13,7 +13,7 @@ import java.util.function.Supplier;
 public class Reactor<T> implements Server<T> {
     private final ConnectionsImpl<T> connections;
     private final int port;
-    private int connectID = 0;
+    private int connectId = 0;
     private final Supplier<BidiMessagingProtocolImpl> protocolFactory;
     private final Supplier<MessageEncoderDecoderImpl> readerFactory;
     private final ActorThreadPool pool;
@@ -99,8 +99,9 @@ public class Reactor<T> implements Server<T> {
                 protocolFactory.get(),
                 clientChan,
                 this);
-        handler.getProtocol().start(connectID, connections);
-        connectID++;
+        connections.addHandlerMap(connectId,handler);
+        handler.getProtocol().start(connectId, connections);
+        connectId++;
         clientChan.register(selector, SelectionKey.OP_READ, handler);
     }
 
